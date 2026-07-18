@@ -1,0 +1,67 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+  web:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - static_files:/app/staticfiles
+      - media_files:/app/media
+    depends_on:
+      - db
+      - redis
+
+  celery:
+    build: .
+    command: celery -A config worker -l info -P solo
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - media_files:/app/media
+    depends_on:
+      - db
+      - redis
+
+  celery-beat:
+    build: .
+    command: celery -A config beat -l info
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      - db
+      - redis
+
+  # nginx (build du frontend + reverse proxy) — à activer une fois le frontend
+  # initialisé (Dockerfile.nginx, comme schoolavia) :
+  # nginx:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.nginx
+  #     args:
+  #       VITE_API_BASE_URL: ${VITE_API_BASE_URL}
+  #   restart: unless-stopped
+  #   ports:
+  #     - "${NGINX_PORT:-80}:80"
+  #   volumes:
+  #     - static_files:/app/staticfiles
+  #     - media_files:/app/media
+  #   depends_on:
+  #     - web
+
+volumes:
+  postgres_data:
+  static_files:
+  media_files:

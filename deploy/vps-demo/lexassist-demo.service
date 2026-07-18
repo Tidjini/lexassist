@@ -1,0 +1,16 @@
+[Unit]
+Description=LexAssist demo (daphne ASGI, env de test/demo sur le VPS)
+After=network.target postgresql.service redis-server.service
+Wants=postgresql.service redis-server.service
+
+[Service]
+User=tidjini
+Group=tidjini
+WorkingDirectory=/srv/lexassist-demo/app
+Environment=DJANGO_SETTINGS_MODULE=config.settings.prod
+ExecStart=/srv/lexassist-demo/venv/bin/daphne -b 127.0.0.1 -p 8002 config.asgi:application
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
