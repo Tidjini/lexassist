@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { CATEGORIAS, categoriaLabel } from '../index';
+import { CATEGORIAS, categoriaLabelKey } from '../index';
 
-describe('categoriaLabel', () => {
-	it('devuelve la etiqueta en español de una categoría conocida', () => {
-		expect(categoriaLabel('NIE')).toBe('NIE');
-		expect(categoriaLabel('FICHE_PAIE')).toBe('Nómina');
+describe('categoriaLabelKey', () => {
+	it('devuelve la clave de traducción de una categoría conocida', () => {
+		expect(categoriaLabelKey('NIE')).toBe('documentos.categoria.NIE');
+		expect(categoriaLabelKey('FICHE_PAIE')).toBe('documentos.categoria.FICHE_PAIE');
 	});
 
 	it('cubre las 10 categorías del backend (apps/documents/models.py Document.Categorie)', () => {

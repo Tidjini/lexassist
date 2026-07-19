@@ -9,6 +9,7 @@ import Chip from '@mui/material/Chip';
 import IconButton from '@mui/material/IconButton';
 import ListSkeleton from '@/components/ListSkeleton';
 import { useSnackbar } from 'notistack';
+import { useTranslation } from 'react-i18next';
 import { useCliente, useDeleteCliente } from '../../api/hooks/useClientes';
 import ClienteFormDialog from '../forms/ClienteFormDialog';
 
@@ -31,6 +32,7 @@ function Champ({ label, valeur }: { label: string; valeur?: string | null }) {
 function ClienteDetailView() {
 	const { clienteId } = useParams<{ clienteId: string }>();
 	const navigate = useNavigate();
+	const { t } = useTranslation();
 	const { enqueueSnackbar } = useSnackbar();
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const { data: cliente, isLoading } = useCliente(clienteId);
@@ -39,14 +41,14 @@ function ClienteDetailView() {
 	async function eliminar() {
 		if (!cliente) return;
 
-		if (!window.confirm(`¿Eliminar a ${cliente.prenom} ${cliente.nom}?`)) return;
+		if (!window.confirm(t('clientes.confirmarEliminar', { nombre: `${cliente.prenom} ${cliente.nom}` }))) return;
 
 		try {
 			await deleteMutation.mutateAsync(cliente.id);
-			enqueueSnackbar('Cliente eliminado', { variant: 'success' });
+			enqueueSnackbar(t('clientes.eliminado'), { variant: 'success' });
 			navigate('/clientes');
 		} catch {
-			enqueueSnackbar('No se pudo eliminar el cliente', { variant: 'error' });
+			enqueueSnackbar(t('clientes.errorEliminar'), { variant: 'error' });
 		}
 	}
 
@@ -63,12 +65,12 @@ function ClienteDetailView() {
 								variant="h4"
 								className="font-bold"
 							>
-								{cliente ? `${cliente.prenom} ${cliente.nom}` : 'Cliente'}
+								{cliente ? `${cliente.prenom} ${cliente.nom}` : t('clientes.columnaCliente')}
 							</Typography>
 							{cliente && (
 								<Chip
 									size="small"
-									label={cliente.actif ? 'Activo' : 'Inactivo'}
+									label={cliente.actif ? t('clientes.estadoActivo') : t('clientes.estadoInactivo')}
 									color={cliente.actif ? 'success' : 'default'}
 								/>
 							)}
@@ -78,21 +80,21 @@ function ClienteDetailView() {
 							startIcon={<FuseSvgIcon size={18}>lucide:folder-open</FuseSvgIcon>}
 							onClick={() => navigate(`/expedientes?cliente=${clienteId}`)}
 						>
-							Expedientes ({cliente?.nb_dossiers ?? 0})
+							{t('clientes.detalle.expedientes', { count: cliente?.nb_dossiers ?? 0 })}
 						</Button>
 						<Button
 							variant="outlined"
 							startIcon={<FuseSvgIcon size={18}>lucide:file-text</FuseSvgIcon>}
 							onClick={() => navigate(`/documentos?cliente=${clienteId}`)}
 						>
-							Documentos
+							{t('clientes.detalle.documentos')}
 						</Button>
 						<Button
 							variant="outlined"
 							startIcon={<FuseSvgIcon size={18}>lucide:pencil</FuseSvgIcon>}
 							onClick={() => setDialogOpen(true)}
 						>
-							Editar
+							{t('comun.editar')}
 						</Button>
 						<Button
 							variant="outlined"
@@ -100,7 +102,7 @@ function ClienteDetailView() {
 							startIcon={<FuseSvgIcon size={18}>lucide:trash-2</FuseSvgIcon>}
 							onClick={eliminar}
 						>
-							Eliminar
+							{t('comun.eliminar')}
 						</Button>
 					</div>
 				}
@@ -111,44 +113,48 @@ function ClienteDetailView() {
 						{cliente && (
 							<div className="flex flex-col gap-4">
 								<Paper className="rounded-xl p-6">
-									<Typography className="mb-3 font-semibold">Identidad</Typography>
+									<Typography className="mb-3 font-semibold">
+										{t('clientes.seccionIdentidad')}
+									</Typography>
 									<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
 										<Champ
-											label="Fecha de nacimiento"
+											label={t('clientes.campoFechaNacimiento')}
 											valeur={cliente.date_naissance}
 										/>
 										<Champ
-											label="Nacionalidad"
+											label={t('clientes.campoNacionalidad')}
 											valeur={cliente.nationalite}
 										/>
 										<Champ
-											label="NIE"
+											label={t('clientes.campoNie')}
 											valeur={cliente.numero_nie}
 										/>
 										<Champ
-											label="Pasaporte"
+											label={t('clientes.campoPasaporte')}
 											valeur={cliente.numero_passeport}
 										/>
 										<Champ
-											label="DNI"
+											label={t('clientes.campoDni')}
 											valeur={cliente.numero_dni}
 										/>
 									</div>
 								</Paper>
 
 								<Paper className="rounded-xl p-6">
-									<Typography className="mb-3 font-semibold">Contacto</Typography>
+									<Typography className="mb-3 font-semibold">
+										{t('clientes.seccionContacto')}
+									</Typography>
 									<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
 										<Champ
-											label="Teléfono"
+											label={t('clientes.campoTelefono')}
 											valeur={cliente.telephone}
 										/>
 										<Champ
-											label="Email"
+											label={t('clientes.campoEmail')}
 											valeur={cliente.email}
 										/>
 										<Champ
-											label="Dirección"
+											label={t('clientes.campoDireccion')}
 											valeur={cliente.adresse}
 										/>
 									</div>
@@ -156,7 +162,9 @@ function ClienteDetailView() {
 
 								{cliente.notes && (
 									<Paper className="rounded-xl p-6">
-										<Typography className="mb-3 font-semibold">Notas</Typography>
+										<Typography className="mb-3 font-semibold">
+											{t('clientes.detalle.notas')}
+										</Typography>
 										<Typography
 											variant="body2"
 											className="whitespace-pre-wrap"
@@ -171,7 +179,7 @@ function ClienteDetailView() {
 										variant="caption"
 										color="text.secondary"
 									>
-										Creado por {cliente.cree_par.displayName}
+										{t('clientes.detalle.creadoPor', { nombre: cliente.cree_par.displayName })}
 									</Typography>
 								)}
 							</div>

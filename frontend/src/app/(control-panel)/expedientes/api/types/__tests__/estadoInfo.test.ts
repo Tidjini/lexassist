@@ -5,7 +5,7 @@ describe('estadoInfo', () => {
 	it('devuelve la información del estado conocido', () => {
 		expect(estadoInfo('DEPOSE')).toEqual({
 			value: 'DEPOSE',
-			label: 'Presentado',
+			labelKey: 'expedientes.estadoPresentado',
 			color: 'info'
 		});
 	});

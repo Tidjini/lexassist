@@ -1,38 +1,41 @@
 import { FuseNavItemType } from '@fuse/core/FuseNavigation/types/FuseNavItemType';
 
 /**
- * The navigationConfig object is an array of navigation items for the Fuse application.
- * Libellés en espagnol (interface cliente) — cf. docs/PLAN_ACTION.md.
+ * Construit la navigation avec des libellés traduits (ES par défaut, FR en
+ * option — cf. @i18n). `t` vient de useTranslation() ; voir
+ * NavigationContextProvider, qui reconstruit cette liste à chaque changement
+ * de langue (pas d'export statique ici : la navigation n'existe qu'en
+ * fonction de la langue courante).
  */
-const navigationConfig: FuseNavItemType[] = [
-	{
-		id: 'inicio',
-		title: 'Inicio',
-		type: 'item',
-		icon: 'lucide:home',
-		url: '/inicio'
-	},
-	{
-		id: 'clientes',
-		title: 'Clientes',
-		type: 'item',
-		icon: 'lucide:users',
-		url: '/clientes'
-	},
-	{
-		id: 'expedientes',
-		title: 'Expedientes',
-		type: 'item',
-		icon: 'lucide:folder-open',
-		url: '/expedientes'
-	},
-	{
-		id: 'documentos',
-		title: 'Documentos',
-		type: 'item',
-		icon: 'lucide:file-text',
-		url: '/documentos'
-	}
-];
-
-export default navigationConfig;
+export function buildNavigationConfig(t: (key: string) => string): FuseNavItemType[] {
+	return [
+		{
+			id: 'inicio',
+			title: t('inicio.tituloPagina'),
+			type: 'item',
+			icon: 'lucide:home',
+			url: '/inicio'
+		},
+		{
+			id: 'clientes',
+			title: t('clientes.tituloPagina'),
+			type: 'item',
+			icon: 'lucide:users',
+			url: '/clientes'
+		},
+		{
+			id: 'expedientes',
+			title: t('expedientes.tituloPagina'),
+			type: 'item',
+			icon: 'lucide:folder-open',
+			url: '/expedientes'
+		},
+		{
+			id: 'documentos',
+			title: t('documentos.tituloPagina'),
+			type: 'item',
+			icon: 'lucide:file-text',
+			url: '/documentos'
+		}
+	];
+}

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -10,23 +10,26 @@ import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import Button from '@mui/material/Button';
 import { useSnackbar } from 'notistack';
+import { useTranslation } from 'react-i18next';
 import { useClientes } from '../../../clientes/api/hooks/useClientes';
 import type { Cliente } from '../../../clientes/api/types';
 import { useCreateExpediente, useUpdateExpediente } from '../../api/hooks/useExpedientes';
 import type { Expediente } from '../../api/types';
 import { extractErrorMessage } from '@/utils/apiError';
 
-const schema = z.object({
-	cliente: z
-		.number()
-		.nullable()
-		.refine((v) => v !== null, { message: 'El cliente es obligatorio' }),
-	titre: z.string().min(1, 'El título es obligatorio'),
-	type_procedure: z.string().optional(),
-	notes: z.string().optional()
-});
+function buildSchema(t: (key: string) => string) {
+	return z.object({
+		cliente: z
+			.number()
+			.nullable()
+			.refine((v) => v !== null, { message: t('expedientes.errorClienteObligatorio') }),
+		titre: z.string().min(1, t('expedientes.errorTituloObligatorio')),
+		type_procedure: z.string().optional(),
+		notes: z.string().optional()
+	});
+}
 
-type FormValues = z.infer<typeof schema>;
+type FormValues = z.infer<ReturnType<typeof buildSchema>>;
 
 type ExpedienteFormDialogProps = {
 	open: boolean;
@@ -38,6 +41,7 @@ type ExpedienteFormDialogProps = {
 
 function ExpedienteFormDialog(props: ExpedienteFormDialogProps) {
 	const { open, expediente, clienteFijo, onClose, onCreated } = props;
+	const { t } = useTranslation();
 	const { enqueueSnackbar } = useSnackbar();
 	const isEdition = !!expediente;
 	const [busquedaCliente, setBusquedaCliente] = useState('');
@@ -46,6 +50,8 @@ function ExpedienteFormDialog(props: ExpedienteFormDialogProps) {
 		{ search: busquedaCliente || undefined, page: 1 },
 		{ enabled: open && !clienteFijo }
 	);
+
+	const schema = useMemo(() => buildSchema(t), [t]);
 
 	const {
 		register,
@@ -84,7 +90,7 @@ function ExpedienteFormDialog(props: ExpedienteFormDialogProps) {
 					id: expediente!.id,
 					payload: { titre: values.titre, type_procedure: values.type_procedure, notes: values.notes }
 				});
-				enqueueSnackbar('Expediente modificado', { variant: 'success' });
+				enqueueSnackbar(t('expedientes.modificado'), { variant: 'success' });
 				onCreated?.(actualizado);
 			} else {
 				const creado = await createMutation.mutateAsync({
@@ -93,7 +99,7 @@ function ExpedienteFormDialog(props: ExpedienteFormDialogProps) {
 					type_procedure: values.type_procedure,
 					notes: values.notes
 				});
-				enqueueSnackbar('Expediente creado', { variant: 'success' });
+				enqueueSnackbar(t('expedientes.creado'), { variant: 'success' });
 				onCreated?.(creado);
 			}
 
@@ -116,11 +122,13 @@ function ExpedienteFormDialog(props: ExpedienteFormDialogProps) {
 				onSubmit={handleSubmit(onSubmit)}
 				className="flex min-h-0 flex-col"
 			>
-				<DialogTitle>{isEdition ? 'Editar expediente' : 'Nuevo expediente'}</DialogTitle>
+				<DialogTitle>
+					{isEdition ? t('expedientes.formTituloEditar') : t('expedientes.formTituloNuevo')}
+				</DialogTitle>
 				<DialogContent className="flex min-h-0 flex-col gap-4 pt-2">
 					{clienteFijo ? (
 						<TextField
-							label="Cliente"
+							label={t('expedientes.campoCliente')}
 							value={clienteFijo.label}
 							disabled
 							fullWidth
@@ -142,7 +150,7 @@ function ExpedienteFormDialog(props: ExpedienteFormDialogProps) {
 									renderInput={(params) => (
 										<TextField
 											{...params}
-											label="Cliente"
+											label={t('expedientes.campoCliente')}
 											error={!!errors.cliente}
 											helperText={errors.cliente?.message}
 										/>
@@ -154,20 +162,20 @@ function ExpedienteFormDialog(props: ExpedienteFormDialogProps) {
 
 					<TextField
 						autoFocus
-						label="Título"
+						label={t('expedientes.campoTitulo')}
 						fullWidth
 						{...register('titre')}
 						error={!!errors.titre}
 						helperText={errors.titre?.message}
 					/>
 					<TextField
-						label="Tipo de trámite"
+						label={t('expedientes.campoTramite')}
 						fullWidth
-						placeholder="ej: Arraigo social"
+						placeholder={t('expedientes.campoTramitePlaceholder')}
 						{...register('type_procedure')}
 					/>
 					<TextField
-						label="Notas"
+						label={t('expedientes.campoNotas')}
 						fullWidth
 						multiline
 						minRows={3}
@@ -175,13 +183,13 @@ function ExpedienteFormDialog(props: ExpedienteFormDialogProps) {
 					/>
 				</DialogContent>
 				<DialogActions className="p-4">
-					<Button onClick={onClose}>Cancelar</Button>
+					<Button onClick={onClose}>{t('comun.cancelar')}</Button>
 					<Button
 						type="submit"
 						variant="contained"
 						disabled={isSubmitting || isPending}
 					>
-						{isEdition ? 'Guardar' : 'Crear'}
+						{isEdition ? t('comun.guardar') : t('comun.crear')}
 					</Button>
 				</DialogActions>
 			</form>

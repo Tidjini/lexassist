@@ -8,6 +8,7 @@ import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import { DataGrid, type GridColDef, type GridPaginationModel } from '@mui/x-data-grid';
 import { useSnackbar } from 'notistack';
+import { useTranslation } from 'react-i18next';
 import EmptyState from '@/components/EmptyState';
 import { ACCENTS } from '@/configs/designTokens';
 import useDebounce from '@fuse/hooks/useDebounce';
@@ -19,6 +20,7 @@ const PAGE_SIZE = 25;
 
 function ClientesListView() {
 	const navigate = useNavigate();
+	const { t } = useTranslation();
 	const { enqueueSnackbar } = useSnackbar();
 	const [rechercheInput, setRechercheInput] = useState('');
 	const [recherche, setRecherche] = useState('');
@@ -49,32 +51,32 @@ function ClientesListView() {
 	}
 
 	async function eliminar(cliente: Cliente) {
-		if (!window.confirm(`¿Eliminar a ${cliente.prenom} ${cliente.nom}?`)) return;
+		if (!window.confirm(t('clientes.confirmarEliminar', { nombre: `${cliente.prenom} ${cliente.nom}` }))) return;
 
 		try {
 			await deleteMutation.mutateAsync(cliente.id);
-			enqueueSnackbar('Cliente eliminado', { variant: 'success' });
+			enqueueSnackbar(t('clientes.eliminado'), { variant: 'success' });
 		} catch {
-			enqueueSnackbar('No se pudo eliminar el cliente', { variant: 'error' });
+			enqueueSnackbar(t('clientes.errorEliminar'), { variant: 'error' });
 		}
 	}
 
 	const columns: GridColDef<Cliente>[] = [
 		{
 			field: 'nombre_completo',
-			headerName: 'Cliente',
+			headerName: t('clientes.columnaCliente'),
 			flex: 1.2,
 			valueGetter: (_value, row) => `${row.prenom} ${row.nom}`
 		},
-		{ field: 'email', headerName: 'Email', flex: 1 },
-		{ field: 'telephone', headerName: 'Teléfono', flex: 0.8 },
-		{ field: 'numero_nie', headerName: 'NIE', flex: 0.7 },
-		{ field: 'nb_dossiers', headerName: 'Expedientes', flex: 0.6, type: 'number' },
+		{ field: 'email', headerName: t('clientes.columnaEmail'), flex: 1 },
+		{ field: 'telephone', headerName: t('clientes.columnaTelefono'), flex: 0.8 },
+		{ field: 'numero_nie', headerName: t('clientes.columnaNie'), flex: 0.7 },
+		{ field: 'nb_dossiers', headerName: t('clientes.columnaExpedientes'), flex: 0.6, type: 'number' },
 		{
 			field: 'actif',
-			headerName: 'Estado',
+			headerName: t('clientes.columnaEstado'),
 			flex: 0.6,
-			valueGetter: (value: boolean) => (value ? 'Activo' : 'Inactivo')
+			valueGetter: (value: boolean) => (value ? t('clientes.estadoActivo') : t('clientes.estadoInactivo'))
 		},
 		{
 			field: 'acciones',
@@ -90,7 +92,7 @@ function ClientesListView() {
 						eliminar(params.row);
 					}}
 				>
-					Eliminar
+					{t('comun.eliminar')}
 				</Button>
 			)
 		}
@@ -106,9 +108,9 @@ function ClientesListView() {
 								variant="h4"
 								className="font-bold"
 							>
-								Clientes
+								{t('clientes.tituloPagina')}
 							</Typography>
-							<Typography color="text.secondary">La «maleta de datos» de cada cliente</Typography>
+							<Typography color="text.secondary">{t('clientes.subtituloPagina')}</Typography>
 						</div>
 						<Button
 							variant="contained"
@@ -116,7 +118,7 @@ function ClientesListView() {
 							startIcon={<FuseSvgIcon>lucide:plus</FuseSvgIcon>}
 							onClick={abrirCreacion}
 						>
-							Nuevo cliente
+							{t('clientes.nuevoCliente')}
 						</Button>
 					</div>
 				}
@@ -128,7 +130,7 @@ function ClientesListView() {
 								setRechercheInput(e.target.value);
 								appliquerRecherche(e.target.value);
 							}}
-							placeholder="Buscar por nombre, email, NIE…"
+							placeholder={t('clientes.buscarPlaceholder')}
 							size="small"
 							className="mb-4 w-full max-w-xs"
 							slotProps={{
@@ -150,10 +152,10 @@ function ClientesListView() {
 						{sinClientes ? (
 							<EmptyState
 								icone="lucide:users"
-								titre="Todavía no hay clientes"
-								description="Añada su primer cliente para empezar."
+								titre={t('clientes.emptyTitulo')}
+								description={t('clientes.emptyDescripcion')}
 								accent={ACCENTS.clientes}
-								action={{ label: 'Añadir el primer cliente', onClick: abrirCreacion }}
+								action={{ label: t('clientes.emptyAccion'), onClick: abrirCreacion }}
 							/>
 						) : (
 							<DataGrid

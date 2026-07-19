@@ -22,6 +22,11 @@ const settingsConfig: FuseSettingsConfigType = {
 		config: {
 			navbar: {
 				style: 'style-1'
+			},
+			// Placeholder du template Fuse (texte "Footer" sans contenu réel) — désactivé
+			// tant qu'on n'a rien à y mettre.
+			footer: {
+				display: false
 			}
 		} // checkout default layout configs at src/components/theme-layouts for example  src/components/theme-layouts/layout1/Layout1Config.js
 	},

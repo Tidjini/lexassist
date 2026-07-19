@@ -10,21 +10,23 @@ export type CategoriaDocumento =
 	| 'CASIER_JUDICIAIRE'
 	| 'AUTRE';
 
-export const CATEGORIAS: { value: CategoriaDocumento; label: string }[] = [
-	{ value: 'PASSEPORT', label: 'Pasaporte' },
-	{ value: 'NIE', label: 'NIE' },
-	{ value: 'DNI', label: 'DNI' },
-	{ value: 'EMPADRONAMIENTO', label: 'Empadronamiento' },
-	{ value: 'CONTRAT', label: 'Contrato' },
-	{ value: 'VIDA_LABORAL', label: 'Vida laboral' },
-	{ value: 'FICHE_PAIE', label: 'Nómina' },
-	{ value: 'DIPLOME', label: 'Diploma' },
-	{ value: 'CASIER_JUDICIAIRE', label: 'Certificado de antecedentes' },
-	{ value: 'AUTRE', label: 'Otro' }
+// labelKey pointe vers une clé de traduction (namespace documentos.categoria.*)
+// plutôt que du texte en dur — le libellé affiché dépend de la langue (ES/FR).
+export const CATEGORIAS: { value: CategoriaDocumento; labelKey: string }[] = [
+	{ value: 'PASSEPORT', labelKey: 'documentos.categoria.PASSEPORT' },
+	{ value: 'NIE', labelKey: 'documentos.categoria.NIE' },
+	{ value: 'DNI', labelKey: 'documentos.categoria.DNI' },
+	{ value: 'EMPADRONAMIENTO', labelKey: 'documentos.categoria.EMPADRONAMIENTO' },
+	{ value: 'CONTRAT', labelKey: 'documentos.categoria.CONTRAT' },
+	{ value: 'VIDA_LABORAL', labelKey: 'documentos.categoria.VIDA_LABORAL' },
+	{ value: 'FICHE_PAIE', labelKey: 'documentos.categoria.FICHE_PAIE' },
+	{ value: 'DIPLOME', labelKey: 'documentos.categoria.DIPLOME' },
+	{ value: 'CASIER_JUDICIAIRE', labelKey: 'documentos.categoria.CASIER_JUDICIAIRE' },
+	{ value: 'AUTRE', labelKey: 'documentos.categoria.AUTRE' }
 ];
 
-export function categoriaLabel(categoria: CategoriaDocumento) {
-	return CATEGORIAS.find((c) => c.value === categoria)?.label ?? categoria;
+export function categoriaLabelKey(categoria: CategoriaDocumento) {
+	return CATEGORIAS.find((c) => c.value === categoria)?.labelKey ?? 'documentos.categoria.AUTRE';
 }
 
 export type Documento = {

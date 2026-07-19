@@ -10,6 +10,7 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { useSnackbar } from 'notistack';
+import { useTranslation } from 'react-i18next';
 import { useClientes } from '../../../clientes/api/hooks/useClientes';
 import type { Cliente } from '../../../clientes/api/types';
 import { useSubirDocumento } from '../../api/hooks/useDocumentos';
@@ -24,6 +25,7 @@ type DocumentoUploadDialogProps = {
 
 function DocumentoUploadDialog(props: DocumentoUploadDialogProps) {
 	const { open, clienteFijo, onClose } = props;
+	const { t } = useTranslation();
 	const { enqueueSnackbar } = useSnackbar();
 	const [busquedaCliente, setBusquedaCliente] = useState('');
 	const [cliente, setCliente] = useState<Cliente | null>(null);
@@ -48,13 +50,13 @@ function DocumentoUploadDialog(props: DocumentoUploadDialogProps) {
 		const clienteId = clienteFijo?.id ?? cliente?.id;
 
 		if (!clienteId || !fichier) {
-			enqueueSnackbar('Seleccione un cliente y un archivo', { variant: 'error' });
+			enqueueSnackbar(t('documentos.upload.errorFaltan'), { variant: 'error' });
 			return;
 		}
 
 		try {
 			await subirMutation.mutateAsync({ cliente: clienteId, categorie: categoria, fichier });
-			enqueueSnackbar('Documento subido', { variant: 'success' });
+			enqueueSnackbar(t('documentos.upload.subido'), { variant: 'success' });
 			reset();
 			onClose();
 		} catch (error) {
@@ -69,11 +71,11 @@ function DocumentoUploadDialog(props: DocumentoUploadDialogProps) {
 			fullWidth
 			maxWidth="sm"
 		>
-			<DialogTitle>Subir documento</DialogTitle>
+			<DialogTitle>{t('documentos.upload.titulo')}</DialogTitle>
 			<DialogContent className="flex flex-col gap-4 pt-2">
 				{clienteFijo ? (
 					<TextField
-						label="Cliente"
+						label={t('documentos.upload.campoCliente')}
 						value={clienteFijo.label}
 						disabled
 						fullWidth
@@ -90,7 +92,7 @@ function DocumentoUploadDialog(props: DocumentoUploadDialogProps) {
 						renderInput={(params) => (
 							<TextField
 								{...params}
-								label="Cliente"
+								label={t('documentos.upload.campoCliente')}
 							/>
 						)}
 					/>
@@ -98,7 +100,7 @@ function DocumentoUploadDialog(props: DocumentoUploadDialogProps) {
 
 				<TextField
 					select
-					label="Categoría"
+					label={t('documentos.upload.campoCategoria')}
 					value={categoria}
 					onChange={(e) => setCategoria(e.target.value as CategoriaDocumento)}
 					fullWidth
@@ -108,7 +110,7 @@ function DocumentoUploadDialog(props: DocumentoUploadDialogProps) {
 							key={c.value}
 							value={c.value}
 						>
-							{c.label}
+							{t(c.labelKey)}
 						</MenuItem>
 					))}
 				</TextField>
@@ -118,7 +120,7 @@ function DocumentoUploadDialog(props: DocumentoUploadDialogProps) {
 					variant="outlined"
 					startIcon={<FuseSvgIcon size={18}>lucide:upload</FuseSvgIcon>}
 				>
-					{fichier ? fichier.name : 'Seleccionar archivo (imagen o PDF)'}
+					{fichier ? fichier.name : t('documentos.upload.seleccionarArchivo')}
 					<input
 						type="file"
 						hidden
@@ -130,17 +132,17 @@ function DocumentoUploadDialog(props: DocumentoUploadDialogProps) {
 					variant="caption"
 					color="text.secondary"
 				>
-					Formatos aceptados: JPG, PNG, WEBP, PDF.
+					{t('documentos.upload.formatosAceptados')}
 				</Typography>
 			</DialogContent>
 			<DialogActions className="p-4">
-				<Button onClick={onClose}>Cancelar</Button>
+				<Button onClick={onClose}>{t('comun.cancelar')}</Button>
 				<Button
 					variant="contained"
 					disabled={subirMutation.isPending}
 					onClick={onSubmit}
 				>
-					Subir
+					{t('documentos.upload.botonSubir')}
 				</Button>
 			</DialogActions>
 		</Dialog>

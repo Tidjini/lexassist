@@ -11,6 +11,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import ListSkeleton from '@/components/ListSkeleton';
 import { useSnackbar } from 'notistack';
+import { useTranslation } from 'react-i18next';
 import { useCambiarEstado, useDeleteExpediente, useExpediente } from '../../api/hooks/useExpedientes';
 import { ESTADOS, estadoInfo, type EstadoExpediente } from '../../api/types';
 import { extractErrorMessage } from '@/utils/apiError';
@@ -19,6 +20,7 @@ import ExpedienteFormDialog from '../forms/ExpedienteFormDialog';
 function ExpedienteDetailView() {
 	const { expedienteId } = useParams<{ expedienteId: string }>();
 	const navigate = useNavigate();
+	const { t, i18n } = useTranslation();
 	const { enqueueSnackbar } = useSnackbar();
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const { data: expediente, isLoading } = useExpediente(expedienteId);
@@ -30,7 +32,7 @@ function ExpedienteDetailView() {
 
 		try {
 			await cambiarEstadoMutation.mutateAsync({ id: expediente.id, statut: nuevoEstado });
-			enqueueSnackbar('Estado actualizado', { variant: 'success' });
+			enqueueSnackbar(t('expedientes.detalle.estadoActualizado'), { variant: 'success' });
 		} catch (error) {
 			enqueueSnackbar(await extractErrorMessage(error), { variant: 'error' });
 		}
@@ -39,14 +41,14 @@ function ExpedienteDetailView() {
 	async function eliminar() {
 		if (!expediente) return;
 
-		if (!window.confirm(`¿Eliminar el expediente "${expediente.titre}"?`)) return;
+		if (!window.confirm(t('expedientes.detalle.confirmarEliminar', { titulo: expediente.titre }))) return;
 
 		try {
 			await deleteMutation.mutateAsync(expediente.id);
-			enqueueSnackbar('Expediente eliminado', { variant: 'success' });
+			enqueueSnackbar(t('expedientes.detalle.eliminado'), { variant: 'success' });
 			navigate('/expedientes');
 		} catch {
-			enqueueSnackbar('No se pudo eliminar el expediente', { variant: 'error' });
+			enqueueSnackbar(t('expedientes.detalle.errorEliminar'), { variant: 'error' });
 		}
 	}
 
@@ -63,7 +65,7 @@ function ExpedienteDetailView() {
 								variant="h4"
 								className="font-bold"
 							>
-								{expediente?.titre ?? 'Expediente'}
+								{expediente?.titre ?? t('expedientes.columnaExpediente')}
 							</Typography>
 							{expediente && (
 								<Typography color="text.secondary">{expediente.cliente_nom_complet}</Typography>
@@ -80,7 +82,7 @@ function ExpedienteDetailView() {
 										key={e.value}
 										value={e.value}
 									>
-										{e.label}
+										{t(e.labelKey)}
 									</MenuItem>
 								))}
 							</Select>
@@ -90,14 +92,14 @@ function ExpedienteDetailView() {
 							startIcon={<FuseSvgIcon size={18}>lucide:file-text</FuseSvgIcon>}
 							onClick={() => navigate(`/documentos?dossier=${expedienteId}`)}
 						>
-							Documentos
+							{t('expedientes.detalle.documentos')}
 						</Button>
 						<Button
 							variant="outlined"
 							startIcon={<FuseSvgIcon size={18}>lucide:pencil</FuseSvgIcon>}
 							onClick={() => setDialogOpen(true)}
 						>
-							Editar
+							{t('comun.editar')}
 						</Button>
 						<Button
 							variant="outlined"
@@ -105,7 +107,7 @@ function ExpedienteDetailView() {
 							startIcon={<FuseSvgIcon size={18}>lucide:trash-2</FuseSvgIcon>}
 							onClick={eliminar}
 						>
-							Eliminar
+							{t('comun.eliminar')}
 						</Button>
 					</div>
 				}
@@ -116,14 +118,16 @@ function ExpedienteDetailView() {
 						{expediente && (
 							<div className="flex flex-col gap-4">
 								<Paper className="rounded-xl p-6">
-									<Typography className="mb-3 font-semibold">Detalles</Typography>
+									<Typography className="mb-3 font-semibold">
+										{t('expedientes.detalle.detalles')}
+									</Typography>
 									<div className="grid grid-cols-2 gap-4 md:grid-cols-3">
 										<div>
 											<Typography
 												variant="caption"
 												color="text.secondary"
 											>
-												Tipo de trámite
+												{t('expedientes.detalle.tipoTramite')}
 											</Typography>
 											<Typography variant="body1">{expediente.type_procedure || '—'}</Typography>
 										</div>
@@ -132,7 +136,7 @@ function ExpedienteDetailView() {
 												variant="caption"
 												color="text.secondary"
 											>
-												Fecha de apertura
+												{t('expedientes.detalle.fechaApertura')}
 											</Typography>
 											<Typography variant="body1">{expediente.date_ouverture}</Typography>
 										</div>
@@ -142,7 +146,7 @@ function ExpedienteDetailView() {
 													variant="caption"
 													color="text.secondary"
 												>
-													Fecha de cierre
+													{t('expedientes.detalle.fechaCierre')}
 												</Typography>
 												<Typography variant="body1">{expediente.date_cloture}</Typography>
 											</div>
@@ -159,41 +163,49 @@ function ExpedienteDetailView() {
 								</Paper>
 
 								<Paper className="rounded-xl p-6">
-									<Typography className="mb-3 font-semibold">Historial</Typography>
+									<Typography className="mb-3 font-semibold">
+										{t('expedientes.detalle.historial')}
+									</Typography>
 									{!expediente.evenements || expediente.evenements.length === 0 ? (
 										<Typography
 											variant="body2"
 											color="text.disabled"
 										>
-											Sin cambios de estado todavía.
+											{t('expedientes.detalle.sinHistorial')}
 										</Typography>
 									) : (
 										<div className="flex flex-col gap-3">
-											{expediente.evenements.map((evento) => (
-												<div
-													key={evento.id}
-													className="flex items-center gap-3 border-b pb-3 last:border-b-0 last:pb-0"
-													style={{ borderColor: 'var(--mui-palette-divider)' }}
-												>
-													<Chip
-														size="small"
-														label={estadoInfo(evento.nouveau_statut)?.label}
-														color={estadoInfo(evento.nouveau_statut)?.color}
-													/>
-													<div className="flex-1">
-														<Typography variant="body2">
-															{evento.auteur?.displayName ?? 'Sistema'}
-															{evento.commentaire ? ` — ${evento.commentaire}` : ''}
-														</Typography>
-														<Typography
-															variant="caption"
-															color="text.secondary"
-														>
-															{new Date(evento.created_at).toLocaleString('es-ES')}
-														</Typography>
+											{expediente.evenements.map((evento) => {
+												const info = estadoInfo(evento.nouveau_statut);
+												return (
+													<div
+														key={evento.id}
+														className="flex items-center gap-3 border-b pb-3 last:border-b-0 last:pb-0"
+														style={{ borderColor: 'var(--mui-palette-divider)' }}
+													>
+														<Chip
+															size="small"
+															label={info && t(info.labelKey)}
+															color={info?.color}
+														/>
+														<div className="flex-1">
+															<Typography variant="body2">
+																{evento.auteur?.displayName ??
+																	t('expedientes.detalle.sistema')}
+																{evento.commentaire ? ` — ${evento.commentaire}` : ''}
+															</Typography>
+															<Typography
+																variant="caption"
+																color="text.secondary"
+															>
+																{new Date(evento.created_at).toLocaleString(
+																	i18n.language === 'fr' ? 'fr-FR' : 'es-ES'
+																)}
+															</Typography>
+														</div>
 													</div>
-												</div>
-											))}
+												);
+											})}
 										</div>
 									)}
 								</Paper>

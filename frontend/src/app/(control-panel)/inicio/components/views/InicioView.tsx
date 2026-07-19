@@ -5,6 +5,7 @@ import Paper from '@mui/material/Paper';
 import Chip from '@mui/material/Chip';
 import Skeleton from '@mui/material/Skeleton';
 import { useNavigate } from 'react-router';
+import { useTranslation } from 'react-i18next';
 import useUser from '@auth/useUser';
 import { useClientes } from '../../../clientes/api/hooks/useClientes';
 import { useExpedientes } from '../../../expedientes/api/hooks/useExpedientes';
@@ -17,6 +18,7 @@ import { useDocumentos } from '../../../documentos/api/hooks/useDocumentos';
 function InicioView() {
 	const { data: user } = useUser();
 	const navigate = useNavigate();
+	const { t } = useTranslation();
 
 	const { data: clientesData, isLoading: clientesLoading } = useClientes({ actif: true, page: 1 });
 	const { data: expedientesData, isLoading: expedientesLoading } = useExpedientes({ page: 1 });
@@ -29,32 +31,32 @@ function InicioView() {
 	const tiles = [
 		{
 			icon: 'lucide:users',
-			title: 'Clientes',
-			description: 'La «maleta de datos» de cada cliente, construida automáticamente por la IA.',
+			title: t('clientes.tituloPagina'),
+			description: t('inicio.clientesDesc'),
 			url: '/clientes',
 			cuenta: clientesData?.count,
 			cargando: clientesLoading
 		},
 		{
 			icon: 'lucide:folder-open',
-			title: 'Expedientes',
-			description: 'Expedientes por trámite con estados: en preparación, presentado, requerido, resuelto.',
+			title: t('expedientes.tituloPagina'),
+			description: t('inicio.expedientesDesc'),
 			url: '/expedientes',
 			cuenta: expedientesData?.count,
 			cargando: expedientesLoading
 		},
 		{
 			icon: 'lucide:file-text',
-			title: 'Documentos',
-			description: 'Suba una foto: la IA clasifica el documento, extrae los datos y lo archiva.',
+			title: t('documentos.tituloPagina'),
+			description: t('inicio.documentosDesc'),
 			url: '/documentos',
 			cuenta: documentosData?.count,
 			cargando: documentosLoading
 		},
 		{
 			icon: 'lucide:bell',
-			title: 'Requerimientos abiertos',
-			description: 'Expedientes en estado de requerimiento, a la espera de una respuesta.',
+			title: t('inicio.requerimientosTitulo'),
+			description: t('inicio.requerimientosDesc'),
 			url: '/expedientes?estado=REQUERIMIENTO',
 			cuenta: requerimientosData?.count,
 			cargando: requerimientosLoading
@@ -67,13 +69,13 @@ function InicioView() {
 				<div className="flex w-full flex-col gap-8 p-6 md:p-10">
 					<div>
 						<Typography className="text-3xl leading-tight font-extrabold tracking-tight">
-							Bienvenida, {user?.displayName}
+							{t('inicio.bienvenida', { nombre: user?.displayName })}
 						</Typography>
 						<Typography
 							className="mt-1 text-lg"
 							color="text.secondary"
 						>
-							Su despacho de un vistazo — LexAssist
+							{t('inicio.subtitulo')}
 						</Typography>
 					</div>
 
@@ -119,18 +121,14 @@ function InicioView() {
 							>
 								lucide:sparkles
 							</FuseSvgIcon>
-							<Typography className="text-lg font-semibold">Fase 1 — Prototipo</Typography>
+							<Typography className="text-lg font-semibold">{t('inicio.faseTitulo')}</Typography>
 							<Chip
 								size="small"
 								color="primary"
-								label="en curso"
+								label={t('inicio.faseChip')}
 							/>
 						</div>
-						<Typography color="text.secondary">
-							Gestión de clientes y expedientes, subida de documentos y diseño adaptado al móvil. Las
-							siguientes fases añadirán el escaneo inteligente con IA, los checklists por trámite y la
-							generación automática de formularios oficiales (modelos EX, tasas 790).
-						</Typography>
+						<Typography color="text.secondary">{t('inicio.faseDescripcion')}</Typography>
 					</Paper>
 				</div>
 			}

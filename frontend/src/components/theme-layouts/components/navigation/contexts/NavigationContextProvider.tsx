@@ -1,16 +1,26 @@
 // Create the provider component
-import { ReactNode, useCallback, useState } from 'react';
+import { ReactNode, useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FuseFlatNavItemType, FuseNavItemType } from '@fuse/core/FuseNavigation/types/FuseNavItemType';
 import FuseNavigationHelper from '@fuse/utils/FuseNavigationHelper';
-import navigationConfig from '@/configs/navigationConfig';
+import { buildNavigationConfig } from '@/configs/navigationConfig';
 import FuseNavItemModel from '@fuse/core/FuseNavigation/models/FuseNavItemModel';
 import { PartialDeep } from 'type-fest';
 import { NavigationContext } from '@/components/theme-layouts/components/navigation/contexts/NavigationContext';
 
 export function NavigationContextProvider({ children }: { children: ReactNode }) {
+	const { t, i18n } = useTranslation();
 	const [navigationItems, setNavigationItems] = useState<FuseFlatNavItemType[]>(
-		FuseNavigationHelper.flattenNavigation(navigationConfig)
+		FuseNavigationHelper.flattenNavigation(buildNavigationConfig(t))
 	);
+
+	// Les libellés ("Clientes"/"Clients"…) dépendent de la langue choisie via le
+	// LanguageSwitcher — on reconstruit la nav à chaque changement, sinon elle
+	// resterait figée dans la langue du premier rendu.
+	useEffect(() => {
+		setNavigationItems(FuseNavigationHelper.flattenNavigation(buildNavigationConfig(t)));
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [i18n.language]);
 
 	const setNavigation = useCallback((items: FuseNavItemType[]) => {
 		setNavigationItems(FuseNavigationHelper.flattenNavigation(items));
@@ -49,8 +59,8 @@ export function NavigationContextProvider({ children }: { children: ReactNode })
 	);
 
 	const resetNavigation = useCallback(() => {
-		setNavigationItems(FuseNavigationHelper.flattenNavigation(navigationConfig));
-	}, []);
+		setNavigationItems(FuseNavigationHelper.flattenNavigation(buildNavigationConfig(t)));
+	}, [t]);
 
 	const getNavigationItemById = useCallback(
 		(id: string) => navigationItems.find((item) => item.id === id),

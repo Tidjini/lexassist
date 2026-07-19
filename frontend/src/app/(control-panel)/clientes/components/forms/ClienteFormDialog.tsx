@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -10,25 +10,31 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { useSnackbar } from 'notistack';
+import { useTranslation } from 'react-i18next';
 import { useCreateCliente, useUpdateCliente } from '../../api/hooks/useClientes';
 import type { Cliente } from '../../api/types';
 import { extractErrorMessage } from '@/utils/apiError';
 
-const schema = z.object({
-	nom: z.string().min(1, 'El nombre es obligatorio'),
-	prenom: z.string().min(1, 'El apellido es obligatorio'),
-	email: z.string().email('Email no válido').optional().or(z.literal('')),
-	telephone: z.string().optional(),
-	adresse: z.string().optional(),
-	date_naissance: z.string().optional(),
-	nationalite: z.string().optional(),
-	numero_nie: z.string().optional(),
-	numero_passeport: z.string().optional(),
-	numero_dni: z.string().optional(),
-	notes: z.string().optional()
-});
+// prenom = prénom/nombre (affiché en premier dans un formulaire hispanophone),
+// nom = apellidos — messages d'erreur alignés sur les libellés affichés, pas sur
+// les noms de champs (hérités du modèle Django, en français).
+function buildSchema(t: (key: string) => string) {
+	return z.object({
+		nom: z.string().min(1, t('clientes.errorApellidoObligatorio')),
+		prenom: z.string().min(1, t('clientes.errorNombreObligatorio')),
+		email: z.string().email(t('clientes.errorEmailInvalido')).optional().or(z.literal('')),
+		telephone: z.string().optional(),
+		adresse: z.string().optional(),
+		date_naissance: z.string().optional(),
+		nationalite: z.string().optional(),
+		numero_nie: z.string().optional(),
+		numero_passeport: z.string().optional(),
+		numero_dni: z.string().optional(),
+		notes: z.string().optional()
+	});
+}
 
-type FormValues = z.infer<typeof schema>;
+type FormValues = z.infer<ReturnType<typeof buildSchema>>;
 
 const emptyValues: FormValues = {
 	nom: '',
@@ -53,8 +59,11 @@ type ClienteFormDialogProps = {
 
 function ClienteFormDialog(props: ClienteFormDialogProps) {
 	const { open, cliente, onClose, onCreated } = props;
+	const { t } = useTranslation();
 	const { enqueueSnackbar } = useSnackbar();
 	const isEdition = !!cliente;
+
+	const schema = useMemo(() => buildSchema(t), [t]);
 
 	const {
 		register,
@@ -101,10 +110,10 @@ function ClienteFormDialog(props: ClienteFormDialogProps) {
 		try {
 			if (isEdition) {
 				await updateMutation.mutateAsync({ id: cliente!.id, payload });
-				enqueueSnackbar('Cliente modificado', { variant: 'success' });
+				enqueueSnackbar(t('clientes.modificado'), { variant: 'success' });
 			} else {
 				const creado = await createMutation.mutateAsync(payload);
-				enqueueSnackbar('Cliente creado', { variant: 'success' });
+				enqueueSnackbar(t('clientes.creado'), { variant: 'success' });
 				onCreated?.(creado);
 			}
 
@@ -125,39 +134,39 @@ function ClienteFormDialog(props: ClienteFormDialogProps) {
 				onSubmit={handleSubmit(onSubmit)}
 				className="flex min-h-0 flex-col"
 			>
-				<DialogTitle>{isEdition ? 'Editar cliente' : 'Nuevo cliente'}</DialogTitle>
+				<DialogTitle>{isEdition ? t('clientes.formTituloEditar') : t('clientes.formTituloNuevo')}</DialogTitle>
 				<DialogContent className="flex min-h-0 flex-col gap-4 pt-2">
 					<Typography
 						variant="caption"
 						className="text-text-secondary font-semibold tracking-wide uppercase"
 					>
-						Identidad
+						{t('clientes.seccionIdentidad')}
 					</Typography>
 					<div className="grid grid-cols-2 gap-4">
 						<TextField
 							autoFocus
-							label="Nombre"
-							fullWidth
-							{...register('nom')}
-							error={!!errors.nom}
-							helperText={errors.nom?.message}
-						/>
-						<TextField
-							label="Apellido"
+							label={t('clientes.campoNombre')}
 							fullWidth
 							{...register('prenom')}
 							error={!!errors.prenom}
 							helperText={errors.prenom?.message}
 						/>
 						<TextField
-							label="Fecha de nacimiento"
+							label={t('clientes.campoApellidos')}
+							fullWidth
+							{...register('nom')}
+							error={!!errors.nom}
+							helperText={errors.nom?.message}
+						/>
+						<TextField
+							label={t('clientes.campoFechaNacimiento')}
 							type="date"
 							fullWidth
 							slotProps={{ inputLabel: { shrink: true } }}
 							{...register('date_naissance')}
 						/>
 						<TextField
-							label="Nacionalidad"
+							label={t('clientes.campoNacionalidad')}
 							fullWidth
 							{...register('nationalite')}
 						/>
@@ -167,21 +176,21 @@ function ClienteFormDialog(props: ClienteFormDialogProps) {
 						variant="caption"
 						className="text-text-secondary mt-1 font-semibold tracking-wide uppercase"
 					>
-						Documentos
+						{t('clientes.seccionDocumentos')}
 					</Typography>
 					<div className="grid grid-cols-3 gap-4">
 						<TextField
-							label="NIE"
+							label={t('clientes.campoNie')}
 							fullWidth
 							{...register('numero_nie')}
 						/>
 						<TextField
-							label="Pasaporte"
+							label={t('clientes.campoPasaporte')}
 							fullWidth
 							{...register('numero_passeport')}
 						/>
 						<TextField
-							label="DNI"
+							label={t('clientes.campoDni')}
 							fullWidth
 							{...register('numero_dni')}
 						/>
@@ -191,29 +200,29 @@ function ClienteFormDialog(props: ClienteFormDialogProps) {
 						variant="caption"
 						className="text-text-secondary mt-1 font-semibold tracking-wide uppercase"
 					>
-						Contacto
+						{t('clientes.seccionContacto')}
 					</Typography>
 					<div className="grid grid-cols-2 gap-4">
 						<TextField
-							label="Teléfono"
+							label={t('clientes.campoTelefono')}
 							fullWidth
 							{...register('telephone')}
 						/>
 						<TextField
-							label="Email"
+							label={t('clientes.campoEmail')}
 							fullWidth
 							{...register('email')}
 							error={!!errors.email}
 							helperText={errors.email?.message}
 						/>
 						<TextField
-							label="Dirección"
+							label={t('clientes.campoDireccion')}
 							fullWidth
 							className="col-span-2"
 							{...register('adresse')}
 						/>
 						<TextField
-							label="Notas"
+							label={t('clientes.campoNotas')}
 							fullWidth
 							multiline
 							minRows={2}
@@ -223,13 +232,13 @@ function ClienteFormDialog(props: ClienteFormDialogProps) {
 					</div>
 				</DialogContent>
 				<DialogActions className="p-4">
-					<Button onClick={onClose}>Cancelar</Button>
+					<Button onClick={onClose}>{t('comun.cancelar')}</Button>
 					<Button
 						type="submit"
 						variant="contained"
 						disabled={isSubmitting || isPending}
 					>
-						{isEdition ? 'Guardar' : 'Crear'}
+						{isEdition ? t('comun.guardar') : t('comun.crear')}
 					</Button>
 				</DialogActions>
 			</form>

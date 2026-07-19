@@ -1,12 +1,17 @@
 export type EstadoExpediente = 'PREPARATION' | 'DEPOSE' | 'REQUERIMIENTO' | 'RESOLU';
 
-export const ESTADOS: { value: EstadoExpediente; label: string; color: 'default' | 'info' | 'warning' | 'success' }[] =
-	[
-		{ value: 'PREPARATION', label: 'En preparación', color: 'default' },
-		{ value: 'DEPOSE', label: 'Presentado', color: 'info' },
-		{ value: 'REQUERIMIENTO', label: 'Requerimiento', color: 'warning' },
-		{ value: 'RESOLU', label: 'Resuelto', color: 'success' }
-	];
+// labelKey pointe vers une clé de traduction (namespace expedientes.*) plutôt que du
+// texte en dur — le libellé affiché dépend de la langue choisie (ES/FR).
+export const ESTADOS: {
+	value: EstadoExpediente;
+	labelKey: string;
+	color: 'default' | 'info' | 'warning' | 'success';
+}[] = [
+	{ value: 'PREPARATION', labelKey: 'expedientes.estadoPreparacion', color: 'default' },
+	{ value: 'DEPOSE', labelKey: 'expedientes.estadoPresentado', color: 'info' },
+	{ value: 'REQUERIMIENTO', labelKey: 'expedientes.estadoRequerimiento', color: 'warning' },
+	{ value: 'RESOLU', labelKey: 'expedientes.estadoResuelto', color: 'success' }
+];
 
 export function estadoInfo(estado: EstadoExpediente) {
 	return ESTADOS.find((e) => e.value === estado);

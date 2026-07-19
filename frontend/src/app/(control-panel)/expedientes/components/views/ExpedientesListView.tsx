@@ -9,6 +9,7 @@ import MenuItem from '@mui/material/MenuItem';
 import InputAdornment from '@mui/material/InputAdornment';
 import Chip from '@mui/material/Chip';
 import { DataGrid, type GridColDef, type GridPaginationModel } from '@mui/x-data-grid';
+import { useTranslation } from 'react-i18next';
 import EmptyState from '@/components/EmptyState';
 import { ACCENTS } from '@/configs/designTokens';
 import useDebounce from '@fuse/hooks/useDebounce';
@@ -20,6 +21,7 @@ const PAGE_SIZE = 25;
 
 function ExpedientesListView() {
 	const navigate = useNavigate();
+	const { t } = useTranslation();
 	const [searchParams] = useSearchParams();
 	const clienteFiltro = searchParams.get('cliente');
 	const [rechercheInput, setRechercheInput] = useState('');
@@ -50,22 +52,25 @@ function ExpedientesListView() {
 	const sinExpedientes = !isLoading && total === 0 && !recherche && !estado;
 
 	const columns: GridColDef<Expediente>[] = [
-		{ field: 'titre', headerName: 'Expediente', flex: 1.2 },
-		{ field: 'cliente_nom_complet', headerName: 'Cliente', flex: 1 },
-		{ field: 'type_procedure', headerName: 'Trámite', flex: 0.8 },
+		{ field: 'titre', headerName: t('expedientes.columnaExpediente'), flex: 1.2 },
+		{ field: 'cliente_nom_complet', headerName: t('expedientes.columnaCliente'), flex: 1 },
+		{ field: 'type_procedure', headerName: t('expedientes.columnaTramite'), flex: 0.8 },
 		{
 			field: 'statut',
-			headerName: 'Estado',
+			headerName: t('expedientes.columnaEstado'),
 			flex: 0.8,
-			renderCell: (params) => (
-				<Chip
-					size="small"
-					label={estadoInfo(params.value as EstadoExpediente)?.label}
-					color={estadoInfo(params.value as EstadoExpediente)?.color}
-				/>
-			)
+			renderCell: (params) => {
+				const info = estadoInfo(params.value as EstadoExpediente);
+				return (
+					<Chip
+						size="small"
+						label={info && t(info.labelKey)}
+						color={info?.color}
+					/>
+				);
+			}
 		},
-		{ field: 'date_ouverture', headerName: 'Abierto', flex: 0.6 }
+		{ field: 'date_ouverture', headerName: t('expedientes.columnaAbierto'), flex: 0.6 }
 	];
 
 	return (
@@ -78,9 +83,9 @@ function ExpedientesListView() {
 								variant="h4"
 								className="font-bold"
 							>
-								Expedientes
+								{t('expedientes.tituloPagina')}
 							</Typography>
-							<Typography color="text.secondary">Trámites por cliente, con su estado</Typography>
+							<Typography color="text.secondary">{t('expedientes.subtituloPagina')}</Typography>
 						</div>
 						<Button
 							variant="contained"
@@ -88,7 +93,7 @@ function ExpedientesListView() {
 							startIcon={<FuseSvgIcon>lucide:plus</FuseSvgIcon>}
 							onClick={() => setDialogOpen(true)}
 						>
-							Nuevo expediente
+							{t('expedientes.nuevoExpediente')}
 						</Button>
 					</div>
 				}
@@ -101,7 +106,7 @@ function ExpedientesListView() {
 									setRechercheInput(e.target.value);
 									appliquerRecherche(e.target.value);
 								}}
-								placeholder="Buscar por título, cliente…"
+								placeholder={t('expedientes.buscarPlaceholder')}
 								size="small"
 								className="w-full sm:max-w-xs"
 								slotProps={{
@@ -122,7 +127,7 @@ function ExpedientesListView() {
 							<TextField
 								select
 								size="small"
-								label="Estado"
+								label={t('expedientes.filtroEstado')}
 								value={estado}
 								onChange={(e) => {
 									setEstado(e.target.value as EstadoExpediente | '');
@@ -131,14 +136,14 @@ function ExpedientesListView() {
 								className="w-full sm:w-48"
 							>
 								<MenuItem value="">
-									<em>Todos</em>
+									<em>{t('expedientes.filtroTodos')}</em>
 								</MenuItem>
 								{ESTADOS.map((e) => (
 									<MenuItem
 										key={e.value}
 										value={e.value}
 									>
-										{e.label}
+										{t(e.labelKey)}
 									</MenuItem>
 								))}
 							</TextField>
@@ -147,10 +152,10 @@ function ExpedientesListView() {
 						{sinExpedientes ? (
 							<EmptyState
 								icone="lucide:folder-open"
-								titre="Todavía no hay expedientes"
-								description="Cree el primer expediente para empezar a seguir un trámite."
+								titre={t('expedientes.emptyTitulo')}
+								description={t('expedientes.emptyDescripcion')}
 								accent={ACCENTS.expedientes}
-								action={{ label: 'Crear el primer expediente', onClick: () => setDialogOpen(true) }}
+								action={{ label: t('expedientes.emptyAccion'), onClick: () => setDialogOpen(true) }}
 							/>
 						) : (
 							<DataGrid

@@ -45,8 +45,8 @@ describe('ClienteFormDialog', () => {
 			/>
 		);
 
-		await user.type(screen.getByLabelText('Nombre'), 'Garcia');
-		await user.type(screen.getByLabelText('Apellido'), 'Maria');
+		await user.type(screen.getByLabelText('Nombre'), 'Maria');
+		await user.type(screen.getByLabelText('Apellidos'), 'Garcia');
 		await user.click(screen.getByRole('button', { name: 'Crear' }));
 
 		await waitFor(() =>

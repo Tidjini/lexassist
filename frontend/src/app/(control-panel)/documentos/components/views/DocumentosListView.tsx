@@ -9,10 +9,11 @@ import MenuItem from '@mui/material/MenuItem';
 import IconButton from '@mui/material/IconButton';
 import { DataGrid, type GridColDef, type GridPaginationModel } from '@mui/x-data-grid';
 import { useSnackbar } from 'notistack';
+import { useTranslation } from 'react-i18next';
 import EmptyState from '@/components/EmptyState';
 import { ACCENTS } from '@/configs/designTokens';
 import { useDeleteDocumento, useDocumentos } from '../../api/hooks/useDocumentos';
-import { CATEGORIAS, categoriaLabel, type CategoriaDocumento, type Documento } from '../../api/types';
+import { CATEGORIAS, categoriaLabelKey, type CategoriaDocumento, type Documento } from '../../api/types';
 import DocumentoUploadDialog from '../forms/DocumentoUploadDialog';
 import DocumentoPreviewDialog from './DocumentoPreviewDialog';
 
@@ -27,6 +28,7 @@ function formatearTamano(bytes: number) {
 }
 
 function DocumentosListView() {
+	const { t, i18n } = useTranslation();
 	const { enqueueSnackbar } = useSnackbar();
 	const [searchParams] = useSearchParams();
 	const clienteFiltro = searchParams.get('cliente');
@@ -52,30 +54,36 @@ function DocumentosListView() {
 	const sinDocumentos = !isLoading && total === 0 && !categoria;
 
 	async function eliminar(documento: Documento) {
-		if (!window.confirm(`¿Eliminar "${documento.nom_original}"?`)) return;
+		if (!window.confirm(t('documentos.confirmarEliminar', { nombre: documento.nom_original }))) return;
 
 		try {
 			await deleteMutation.mutateAsync(documento.id);
-			enqueueSnackbar('Documento eliminado', { variant: 'success' });
+			enqueueSnackbar(t('documentos.eliminado'), { variant: 'success' });
 		} catch {
-			enqueueSnackbar('No se pudo eliminar el documento', { variant: 'error' });
+			enqueueSnackbar(t('documentos.errorEliminar'), { variant: 'error' });
 		}
 	}
 
 	const columns: GridColDef<Documento>[] = [
-		{ field: 'nom_original', headerName: 'Archivo', flex: 1.2 },
+		{ field: 'nom_original', headerName: t('documentos.columnaArchivo'), flex: 1.2 },
 		{
 			field: 'categorie',
-			headerName: 'Categoría',
+			headerName: t('documentos.columnaCategoria'),
 			flex: 0.8,
-			valueGetter: (value: CategoriaDocumento) => categoriaLabel(value)
+			valueGetter: (value: CategoriaDocumento) => t(categoriaLabelKey(value))
 		},
-		{ field: 'taille', headerName: 'Tamaño', flex: 0.5, valueGetter: (value: number) => formatearTamano(value) },
+		{
+			field: 'taille',
+			headerName: t('documentos.columnaTamano'),
+			flex: 0.5,
+			valueGetter: (value: number) => formatearTamano(value)
+		},
 		{
 			field: 'created_at',
-			headerName: 'Subido',
+			headerName: t('documentos.columnaSubido'),
 			flex: 0.6,
-			valueGetter: (value: string) => new Date(value).toLocaleDateString('es-ES')
+			valueGetter: (value: string) =>
+				new Date(value).toLocaleDateString(i18n.language === 'fr' ? 'fr-FR' : 'es-ES')
 		},
 		{
 			field: 'acciones',
@@ -107,9 +115,9 @@ function DocumentosListView() {
 								variant="h4"
 								className="font-bold"
 							>
-								Documentos
+								{t('documentos.tituloPagina')}
 							</Typography>
-							<Typography color="text.secondary">Suba una foto o un PDF y clasifíquelo</Typography>
+							<Typography color="text.secondary">{t('documentos.subtituloPagina')}</Typography>
 						</div>
 						<Button
 							variant="contained"
@@ -117,7 +125,7 @@ function DocumentosListView() {
 							startIcon={<FuseSvgIcon>lucide:upload</FuseSvgIcon>}
 							onClick={() => setDialogOpen(true)}
 						>
-							Subir documento
+							{t('documentos.subirDocumento')}
 						</Button>
 					</div>
 				}
@@ -126,7 +134,7 @@ function DocumentosListView() {
 						<TextField
 							select
 							size="small"
-							label="Categoría"
+							label={t('documentos.filtroCategoria')}
 							value={categoria}
 							onChange={(e) => {
 								setCategoria(e.target.value as CategoriaDocumento | '');
@@ -135,14 +143,14 @@ function DocumentosListView() {
 							className="mb-4 w-full max-w-xs"
 						>
 							<MenuItem value="">
-								<em>Todas</em>
+								<em>{t('documentos.filtroTodas')}</em>
 							</MenuItem>
 							{CATEGORIAS.map((c) => (
 								<MenuItem
 									key={c.value}
 									value={c.value}
 								>
-									{c.label}
+									{t(c.labelKey)}
 								</MenuItem>
 							))}
 						</TextField>
@@ -150,10 +158,10 @@ function DocumentosListView() {
 						{sinDocumentos ? (
 							<EmptyState
 								icone="lucide:file-text"
-								titre="Todavía no hay documentos"
-								description="Suba el primer documento de un cliente: la IA lo clasificará automáticamente en una fase futura."
+								titre={t('documentos.emptyTitulo')}
+								description={t('documentos.emptyDescripcion')}
 								accent={ACCENTS.documentos}
-								action={{ label: 'Subir el primer documento', onClick: () => setDialogOpen(true) }}
+								action={{ label: t('documentos.emptyAccion'), onClick: () => setDialogOpen(true) }}
 							/>
 						) : (
 							<DataGrid
