@@ -1,6 +1,7 @@
 from unittest.mock import patch
 
 import pytest
+from django.test import override_settings
 from django_tenants.utils import schema_context
 
 from apps.tenants.models import Cabinet
@@ -79,6 +80,66 @@ class TestProcesarDocumento:
     def test_document_inexistant_ne_leve_pas(self, cabinet):
         with schema_context(cabinet.schema_name):
             procesar_documento(999999, cabinet.schema_name)
+
+
+@pytest.mark.django_db
+class TestModoSimulado:
+    """IA_MODO_SIMULADO : interrupteur explicite (jamais activé automatiquement) pour
+    tester toute la procédure avec des documents fictifs, sans clé API."""
+
+    @override_settings(ANTHROPIC_API_KEY="", IA_MODO_SIMULADO=True)
+    def test_simule_l_analyse_a_partir_du_nom_de_fichier(self, cabinet):
+        with schema_context(cabinet.schema_name):
+            documento = DocumentFactory(nom_original="Garcia_Maria_NIE_X1234567A.jpg")
+
+            procesar_documento(documento.id, cabinet.schema_name)
+
+            documento.refresh_from_db()
+            assert documento.estado_ia == Document.EstadoIA.SIMULADO
+            assert documento.categoria_sugerida == "NIE"
+            assert documento.datos_extraidos["numero_documento"] == "X1234567A"
+
+    @override_settings(ANTHROPIC_API_KEY="", IA_MODO_SIMULADO=True)
+    def test_le_mode_simule_rapproche_aussi_un_client(self, cabinet):
+        with schema_context(cabinet.schema_name):
+            from apps.clients.factories import ClientFactory
+
+            ClientFactory(nom="Garcia", prenom="Maria", numero_nie="X1234567A")
+            documento = DocumentFactory(
+                cliente=None, nom_original="Maria_Garcia_NIE_X1234567A.jpg"
+            )
+
+            procesar_documento(documento.id, cabinet.schema_name)
+
+            documento.refresh_from_db()
+            assert documento.cliente is not None
+            assert documento.cliente.nom == "Garcia"
+            assert documento.cliente_confirmado is False
+
+    @override_settings(ANTHROPIC_API_KEY="", IA_MODO_SIMULADO=False)
+    def test_sans_l_interrupteur_reste_sur_sin_clave(self, cabinet):
+        with schema_context(cabinet.schema_name):
+            documento = DocumentFactory(nom_original="Garcia_Maria_NIE_X1234567A.jpg")
+
+            procesar_documento(documento.id, cabinet.schema_name)
+
+            documento.refresh_from_db()
+            assert documento.estado_ia == Document.EstadoIA.SIN_CLAVE
+
+    @override_settings(ANTHROPIC_API_KEY="sk-test", IA_MODO_SIMULADO=True)
+    def test_une_vraie_cle_est_toujours_prioritaire_sur_la_simulation(self, cabinet):
+        with schema_context(cabinet.schema_name):
+            documento = DocumentFactory(nom_original="Garcia_Maria_NIE_X1234567A.jpg")
+
+            with patch("apps.documents.tasks.vision.analizar_documento") as vision_mock:
+                vision_mock.return_value = {
+                    "categoria": "DNI", "campos": {}, "fecha_expiracion": None,
+                }
+                procesar_documento(documento.id, cabinet.schema_name)
+
+            documento.refresh_from_db()
+            assert documento.estado_ia == Document.EstadoIA.COMPLETADO
+            vision_mock.assert_called_once()
 
 
 @pytest.mark.django_db

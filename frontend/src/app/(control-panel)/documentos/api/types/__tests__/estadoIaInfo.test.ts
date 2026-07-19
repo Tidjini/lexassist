@@ -10,7 +10,14 @@ describe('estadoIaInfo', () => {
 		});
 	});
 
-	it('cubre los 5 estados del backend (apps/documents/models.py Document.EstadoIA)', () => {
-		expect(ESTADOS_IA.map((e) => e.value)).toEqual(['PENDIENTE', 'PROCESANDO', 'COMPLETADO', 'ERROR', 'SIN_CLAVE']);
+	it('cubre los 6 estados del backend (apps/documents/models.py Document.EstadoIA)', () => {
+		expect(ESTADOS_IA.map((e) => e.value)).toEqual([
+			'PENDIENTE',
+			'PROCESANDO',
+			'COMPLETADO',
+			'ERROR',
+			'SIN_CLAVE',
+			'SIMULADO'
+		]);
 	});
 });

@@ -2,11 +2,13 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
+from django.test import override_settings
 from django_tenants.utils import schema_context
 
 from apps.tenants.models import Cabinet
 from apps.accounts.models import User
 from apps.clients.factories import ClientFactory
+from apps.dossiers.factories import DossierFactory
 from apps.assistant.models import Conversacion, Mensaje
 from apps.assistant.service import responder
 
@@ -111,3 +113,63 @@ class TestResponder:
                 mensaje = responder(conversacion, "Busca algo")
 
             assert "demasiados pasos" in mensaje.contenido
+
+
+@pytest.mark.django_db
+class TestResponderSimulado:
+    """IA_MODO_SIMULADO : interrupteur explicite (jamais activé automatiquement) pour
+    tester la boucle complète — dispatch d'un outil réel sur les vraies données — sans
+    clé API."""
+
+    @override_settings(ANTHROPIC_API_KEY="", IA_MODO_SIMULADO=True)
+    def test_reconoce_pregunta_sobre_documentos_por_expirar(self, cabinet, avocat):
+        with schema_context(cabinet.schema_name):
+            conversacion = Conversacion.objects.create(usuario=avocat)
+
+            mensaje = responder(conversacion, "¿Qué pasaportes caducan pronto?")
+
+            assert mensaje.contenido.startswith("[Modo simulado]")
+            assert "caducar" in mensaje.contenido
+
+    @override_settings(ANTHROPIC_API_KEY="", IA_MODO_SIMULADO=True)
+    def test_reconoce_busqueda_de_cliente_y_usa_la_base_real(self, cabinet, avocat):
+        with schema_context(cabinet.schema_name):
+            ClientFactory(nom="Garcia", prenom="Maria")
+            conversacion = Conversacion.objects.create(usuario=avocat)
+
+            mensaje = responder(conversacion, "busca cliente Garcia")
+
+            assert "Maria Garcia" in mensaje.contenido
+
+    @override_settings(ANTHROPIC_API_KEY="", IA_MODO_SIMULADO=True)
+    def test_reconoce_peticion_de_expedientes(self, cabinet, avocat):
+        with schema_context(cabinet.schema_name):
+            dossier = DossierFactory(titre="Arraigo social")
+            conversacion = Conversacion.objects.create(usuario=avocat)
+
+            mensaje = responder(conversacion, "lista los expedientes")
+
+            assert "Arraigo social" in mensaje.contenido
+
+    @override_settings(ANTHROPIC_API_KEY="", IA_MODO_SIMULADO=True)
+    def test_sin_palabra_clave_reconocida_da_una_respuesta_generica(self, cabinet, avocat):
+        with schema_context(cabinet.schema_name):
+            conversacion = Conversacion.objects.create(usuario=avocat)
+
+            mensaje = responder(conversacion, "buenos días")
+
+            assert mensaje.contenido.startswith("[Modo simulado]")
+            assert "No he reconocido" in mensaje.contenido
+
+    @override_settings(ANTHROPIC_API_KEY="sk-test", IA_MODO_SIMULADO=True)
+    def test_una_vraie_cle_es_siempre_prioritaria_sobre_la_simulacion(self, cabinet, avocat):
+        with schema_context(cabinet.schema_name):
+            conversacion = Conversacion.objects.create(usuario=avocat)
+            respuesta_final = SimpleNamespace(stop_reason="end_turn", content=[_bloque_texto("Hola real")])
+
+            with patch("apps.assistant.service.anthropic.Anthropic") as ClienteMock:
+                ClienteMock.return_value.messages.create.return_value = respuesta_final
+                mensaje = responder(conversacion, "Hola")
+
+            assert mensaje.contenido == "Hola real"
+            assert not mensaje.contenido.startswith("[Modo simulado]")

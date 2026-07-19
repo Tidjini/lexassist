@@ -1,6 +1,6 @@
 # LexAssist — État d'avancement
 
-Dernière mise à jour : 2026-07-19 (Phase 4 — Assistant, structure sans clé API).
+Dernière mise à jour : 2026-07-19 (mode simulé — tester la procédure sans clé API).
 Complète `docs/PLAN_ACTION.md` (le plan initial) en donnant une photo de ce qui est
 réellement fait, testé et déployé à date.
 
@@ -111,6 +111,30 @@ réellement fait, testé et déployé à date.
 - Décision explicite de l'utilisateur (2026-07-19) : construire la structure maintenant
   sans clé plutôt que d'attendre — la clé pourra être ajoutée plus tard sans changement de
   code (même mécanisme que Phase 2).
+
+## Fait (mode simulé — `IA_MODO_SIMULADO`, tester la procédure sans clé API)
+
+- **Interrupteur explicite** (`IA_MODO_SIMULADO=True` dans `.env`, **jamais activé
+  automatiquement** même en l'absence de clé — décision explicite de l'utilisateur, pour
+  ne jamais changer le comportement du reste de la démo sans le vouloir). Pensé pour
+  tester toute la procédure — classification, rapprochement/création de client, alertes,
+  assistant — avec des documents fictifs, sans appeler Claude.
+- **Documents** : `apps.documents.vision.analizar_documento_simulado` fabrique un
+  résultat à partir du nom du fichier (convention libre : `Nombre_Apellidos_CATEGORIE_
+  AAAA-MM-JJ.ext`, ex. `Maria_Garcia_NIE_X1234567A.jpg`). Sans date explicite, les
+  catégories qui expirent habituellement (passeport, NIE, DNI, empadronamiento) reçoivent
+  une échéance à J+45 pour peupler la page Alertas. Le document obtient un nouvel état
+  `estado_ia=SIMULADO` (jamais confondu avec `COMPLETADO`, une vraie analyse) — badge
+  violet distinct dans l'interface. Le rapprochement/la création de client tourne
+  ensuite normalement, avec les mêmes règles strictes que le vrai pipeline.
+- **Assistant** : reconnaissance de mots-clés simple (`documentos_por_expirar`,
+  `buscar_clientes`, `listar_expedientes` reconnus par des mots comme « caduca »,
+  « busca cliente », « expedientes ») qui appelle un vrai outil sur les vraies données ;
+  réponse toujours préfixée par « [Modo simulado] ».
+- Vérifié en navigateur réel de bout en bout : import d'un document fictif → catégorie
+  extraite, client créé automatiquement, apparaît dans Alertas avec sa date d'échéance ;
+  question à l'assistant sur les documents proches d'expirer → réponse correcte utilisant
+  les vraies données.
 
 ### Accès démo
 

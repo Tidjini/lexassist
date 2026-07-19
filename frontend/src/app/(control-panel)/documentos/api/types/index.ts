@@ -29,18 +29,22 @@ export function categoriaLabelKey(categoria: CategoriaDocumento) {
 	return CATEGORIAS.find((c) => c.value === categoria)?.labelKey ?? 'documentos.categoria.AUTRE';
 }
 
-export type EstadoIA = 'PENDIENTE' | 'PROCESANDO' | 'COMPLETADO' | 'ERROR' | 'SIN_CLAVE';
+export type EstadoIA = 'PENDIENTE' | 'PROCESANDO' | 'COMPLETADO' | 'ERROR' | 'SIN_CLAVE' | 'SIMULADO';
 
 export const ESTADOS_IA: {
 	value: EstadoIA;
 	labelKey: string;
-	color: 'default' | 'info' | 'success' | 'error' | 'warning';
+	color: 'default' | 'info' | 'success' | 'error' | 'warning' | 'secondary';
 }[] = [
 	{ value: 'PENDIENTE', labelKey: 'documentos.ia.estadoPendiente', color: 'default' },
 	{ value: 'PROCESANDO', labelKey: 'documentos.ia.estadoProcesando', color: 'info' },
 	{ value: 'COMPLETADO', labelKey: 'documentos.ia.estadoCompletado', color: 'success' },
 	{ value: 'ERROR', labelKey: 'documentos.ia.estadoError', color: 'error' },
-	{ value: 'SIN_CLAVE', labelKey: 'documentos.ia.estadoSinClave', color: 'warning' }
+	{ value: 'SIN_CLAVE', labelKey: 'documentos.ia.estadoSinClave', color: 'warning' },
+	// IA_MODO_SIMULADO côté serveur (voir apps.documents.vision.analizar_documento_
+	// simulado) : résultat fabriqué à partir du nom de fichier, jamais une vraie analyse
+	// — couleur distincte de COMPLETADO pour ne jamais laisser croire à une vraie analyse.
+	{ value: 'SIMULADO', labelKey: 'documentos.ia.estadoSimulado', color: 'secondary' }
 ];
 
 export function estadoIaInfo(estado: EstadoIA) {

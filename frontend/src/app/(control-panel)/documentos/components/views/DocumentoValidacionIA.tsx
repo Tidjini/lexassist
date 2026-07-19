@@ -230,62 +230,63 @@ function DocumentoValidacionIA({ documento: documentoProp }: { documento: Docume
 				</Typography>
 			)}
 
-			{documento.estado_ia === 'COMPLETADO' && documento.cliente !== null && (
-				<>
-					{documento.categoria_sugerida && documento.categoria_sugerida !== documento.categorie && (
-						<div className="flex items-center gap-2">
-							<Typography variant="body2">
-								{t('documentos.ia.categoriaSugerida', {
-									categoria: t(categoriaLabelKey(documento.categoria_sugerida))
-								})}
-							</Typography>
-							<Button
-								size="small"
-								onClick={() => aplicar(true)}
-								disabled={aplicarMutation.isPending}
-							>
-								{t('documentos.ia.usarCategoria')}
-							</Button>
-						</div>
-					)}
-
-					{campos.length === 0 ? (
-						<Typography
-							variant="body2"
-							color="text.disabled"
-						>
-							{t('documentos.ia.sinDatos')}
-						</Typography>
-					) : (
-						<>
-							<div className="flex flex-col">
-								{campos.map(([campo, valeur]) => (
-									<FormControlLabel
-										key={campo}
-										control={
-											<Checkbox
-												size="small"
-												checked={seleccionados.has(campo)}
-												onChange={() => toggle(campo)}
-											/>
-										}
-										label={`${t(ETIQUETAS_CAMPO[campo])}: ${valeur}`}
-									/>
-								))}
+			{(documento.estado_ia === 'COMPLETADO' || documento.estado_ia === 'SIMULADO') &&
+				documento.cliente !== null && (
+					<>
+						{documento.categoria_sugerida && documento.categoria_sugerida !== documento.categorie && (
+							<div className="flex items-center gap-2">
+								<Typography variant="body2">
+									{t('documentos.ia.categoriaSugerida', {
+										categoria: t(categoriaLabelKey(documento.categoria_sugerida))
+									})}
+								</Typography>
+								<Button
+									size="small"
+									onClick={() => aplicar(true)}
+									disabled={aplicarMutation.isPending}
+								>
+									{t('documentos.ia.usarCategoria')}
+								</Button>
 							</div>
-							<Button
-								variant="contained"
-								size="small"
-								className="self-start"
-								disabled={seleccionados.size === 0 || aplicarMutation.isPending}
-								onClick={() => aplicar(false)}
+						)}
+
+						{campos.length === 0 ? (
+							<Typography
+								variant="body2"
+								color="text.disabled"
 							>
-								{t('documentos.ia.aplicarBoton')}
-							</Button>
-						</>
-					)}
-				</>
-			)}
+								{t('documentos.ia.sinDatos')}
+							</Typography>
+						) : (
+							<>
+								<div className="flex flex-col">
+									{campos.map(([campo, valeur]) => (
+										<FormControlLabel
+											key={campo}
+											control={
+												<Checkbox
+													size="small"
+													checked={seleccionados.has(campo)}
+													onChange={() => toggle(campo)}
+												/>
+											}
+											label={`${t(ETIQUETAS_CAMPO[campo])}: ${valeur}`}
+										/>
+									))}
+								</div>
+								<Button
+									variant="contained"
+									size="small"
+									className="self-start"
+									disabled={seleccionados.size === 0 || aplicarMutation.isPending}
+									onClick={() => aplicar(false)}
+								>
+									{t('documentos.ia.aplicarBoton')}
+								</Button>
+							</>
+						)}
+					</>
+				)}
 		</Paper>
 	);
 }

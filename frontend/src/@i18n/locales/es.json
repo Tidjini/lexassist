@@ -136,6 +136,7 @@
 			"estadoCompletado": "Analizado",
 			"estadoError": "Error",
 			"estadoSinClave": "IA no configurada",
+			"estadoSimulado": "Simulado (modo de prueba)",
 			"titulo": "Datos extraídos por la IA",
 			"categoriaSugerida": "Categoría sugerida: {{categoria}}",
 			"usarCategoria": "Usar esta categoría",

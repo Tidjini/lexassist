@@ -136,6 +136,7 @@
 			"estadoCompletado": "Analysé",
 			"estadoError": "Erreur",
 			"estadoSinClave": "IA non configurée",
+			"estadoSimulado": "Simulé (mode de test)",
 			"titulo": "Données extraites par l'IA",
 			"categoriaSugerida": "Catégorie suggérée : {{categoria}}",
 			"usarCategoria": "Utiliser cette catégorie",

@@ -31,6 +31,12 @@ class Document(TimeStampedModel):
         COMPLETADO = "COMPLETADO", "Completado"
         ERROR = "ERROR", "Error"
         SIN_CLAVE = "SIN_CLAVE", "Sin clave configurada"
+        # IA_MODO_SIMULADO=True (ver settings) : résultat fabriqué à partir du nom du
+        # fichier (apps.documents.vision.analizar_documento_simulado), pas d'une vraie
+        # analyse Claude — permet de tester toute la procédure (rapprochement/création de
+        # client, alertes...) sans clé API. Toujours distingué de COMPLETADO pour ne
+        # jamais confondre un résultat de test avec une vraie analyse.
+        SIMULADO = "SIMULADO", "Simulado (modo de prueba)"
 
     # Nullable : un document peut être uploadé sans client choisi (import en masse) —
     # apps.documents.tasks.procesar_documento tente alors de le rattacher à un client

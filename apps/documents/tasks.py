@@ -1,6 +1,7 @@
 from datetime import date
 
 from celery import shared_task
+from django.conf import settings
 from django_tenants.utils import schema_context
 
 from apps.clients.models import Client
@@ -86,13 +87,22 @@ def procesar_documento(document_id, schema_name):
             finally:
                 documento.fichier.close()
 
-            resultado = vision.analizar_documento(fichier_bytes, documento.content_type)
+            # IA_MODO_SIMULADO (interrupteur explicite, jamais automatique) : teste toute
+            # la procédure (rapprochement/création de client, alertes...) avec des
+            # documents fictifs, sans appeler Claude ni avoir besoin d'une clé API.
+            if not settings.ANTHROPIC_API_KEY and settings.IA_MODO_SIMULADO:
+                resultado = vision.analizar_documento_simulado(documento.nom_original)
+                estado_resultado = Document.EstadoIA.SIMULADO
+            else:
+                resultado = vision.analizar_documento(fichier_bytes, documento.content_type)
+                estado_resultado = Document.EstadoIA.COMPLETADO
+
             campos = resultado["campos"]
 
             documento.categoria_sugerida = resultado["categoria"]
             documento.datos_extraidos = campos
             documento.fecha_expiracion = _fecha_o_none(resultado.get("fecha_expiracion"))
-            documento.estado_ia = Document.EstadoIA.COMPLETADO
+            documento.estado_ia = estado_resultado
             documento.error_ia = ""
 
             campos_a_sauvegarder = [
@@ -121,6 +131,9 @@ def procesar_documento(document_id, schema_name):
                     mensaje = f"Documento «{documento.nom_original}» analizado: sin cliente, revisar manualmente."
             else:
                 mensaje = f"Documento «{documento.nom_original}» analizado."
+
+            if estado_resultado == Document.EstadoIA.SIMULADO:
+                mensaje += " (modo simulado)"
 
             documento.save(update_fields=campos_a_sauvegarder)
             tipo = Notification.Tipo.DOCUMENTO_PROCESADO

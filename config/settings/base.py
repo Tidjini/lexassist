@@ -173,6 +173,12 @@ CELERY_RESULT_BACKEND = env("REDIS_URL", default="redis://localhost:6379/0")
 
 # ── IA documentaire : classification + extraction via Claude (apps.documents) ─
 ANTHROPIC_API_KEY = env("ANTHROPIC_API_KEY", default="")
+# Interrupteur explicite (jamais activé automatiquement en l'absence de clé) : simule
+# l'analyse IA des documents et les réponses de l'assistant à partir de règles simples
+# (nom de fichier, mots-clés) au lieu d'appeler Claude — permet de tester toute la
+# procédure avec des documents fictifs sans clé API. Voir apps.documents.vision.
+# analizar_documento_simulado et apps.assistant.service.
+IA_MODO_SIMULADO = env.bool("IA_MODO_SIMULADO", default=False)
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
