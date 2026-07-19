@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import EmptyState from '@/components/EmptyState';
 import { ACCENTS } from '@/configs/designTokens';
 import useThemeMediaQuery from '@fuse/hooks/useThemeMediaQuery';
+import { useCliente } from '../../../clientes/api/hooks/useClientes';
 import { useDeleteDocumento, useDocumentos } from '../../api/hooks/useDocumentos';
 import {
 	CATEGORIAS,
@@ -50,6 +51,14 @@ function DocumentosListView() {
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [previewDocumento, setPreviewDocumento] = useState<Documento | null>(null);
 	const esMobile = useThemeMediaQuery((theme) => theme.breakpoints.down('sm'));
+
+	// Arrivé depuis la fiche d'un client (bouton "Documentos (n)") : le champ Cliente
+	// du formulaire d'upload doit être déjà rempli, pas redemandé à chercher.
+	const { data: clienteDelFiltro } = useCliente(clienteFiltro ?? undefined);
+	const clienteFijo =
+		clienteFiltro && clienteDelFiltro
+			? { id: clienteDelFiltro.id, label: `${clienteDelFiltro.prenom} ${clienteDelFiltro.nom}` }
+			: null;
 
 	const { data, isLoading } = useDocumentos({
 		cliente: clienteFiltro ? Number(clienteFiltro) : undefined,
@@ -211,6 +220,7 @@ function DocumentosListView() {
 
 			<DocumentoUploadDialog
 				open={dialogOpen}
+				clienteFijo={clienteFijo}
 				onClose={() => setDialogOpen(false)}
 			/>
 

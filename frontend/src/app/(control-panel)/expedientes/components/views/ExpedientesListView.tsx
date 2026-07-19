@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import EmptyState from '@/components/EmptyState';
 import { ACCENTS } from '@/configs/designTokens';
 import useDebounce from '@fuse/hooks/useDebounce';
+import { useCliente } from '../../../clientes/api/hooks/useClientes';
 import { useExpedientes } from '../../api/hooks/useExpedientes';
 import { ESTADOS, estadoInfo, type EstadoExpediente, type Expediente } from '../../api/types';
 import ExpedienteFormDialog from '../forms/ExpedienteFormDialog';
@@ -34,6 +35,14 @@ function ExpedientesListView() {
 		pageSize: PAGE_SIZE
 	});
 	const [dialogOpen, setDialogOpen] = useState(false);
+
+	// Arrivé depuis la fiche d'un client (bouton "Expedientes (n)") : le champ Cliente
+	// du formulaire de création doit être déjà rempli, pas redemandé à chercher.
+	const { data: clienteDelFiltro } = useCliente(clienteFiltro ?? undefined);
+	const clienteFijo =
+		clienteFiltro && clienteDelFiltro
+			? { id: clienteDelFiltro.id, label: `${clienteDelFiltro.prenom} ${clienteDelFiltro.nom}` }
+			: null;
 
 	const appliquerRecherche = useDebounce((valeur: string) => {
 		setRecherche(valeur);
@@ -179,6 +188,7 @@ function ExpedientesListView() {
 
 			<ExpedienteFormDialog
 				open={dialogOpen}
+				clienteFijo={clienteFijo}
 				onClose={() => setDialogOpen(false)}
 				onCreated={(expediente) => navigate(`/expedientes/${expediente.id}`)}
 			/>
