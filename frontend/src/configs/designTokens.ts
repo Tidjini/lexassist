@@ -61,9 +61,12 @@ export const DATAGRID_SX = {
 } as const;
 
 // Carte englobant un DataGrid — donne au tableau une frontière nette et une ombre douce
-// au lieu de flotter directement sur le fond de la page.
+// au lieu de flotter directement sur le fond de la page. borderRadius en sx est multiplié
+// par theme.shape.borderRadius (12 ici, voir FuseDefaultSettings) : 1 == 12px, aligné sur
+// le rounded-xl (12px) utilisé par les autres cartes de l'appli. `3` donnait 36px — repéré
+// par Lucia comme beaucoup trop arrondi pour un tableau.
 export const DATAGRID_CARD_SX = {
-	borderRadius: 3,
+	borderRadius: 1,
 	border: '1px solid var(--mui-palette-divider)',
 	boxShadow: OMBRE_CARTE,
 	overflow: 'hidden'
