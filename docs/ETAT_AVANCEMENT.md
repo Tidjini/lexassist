@@ -6,45 +6,64 @@ donnant une photo de ce qui est réellement fait, testé et déployé à date.
 ## Fait (Phase 1)
 
 - **Backend** : apps `clients`, `dossiers` (statuts + historique des événements),
-  `documents` (upload catégorisé) — CRUD complet, isolation par tenant, 30 tests pytest
-  (99 % de couverture sur le nouveau code).
+  `documents` (upload catégorisé) — CRUD complet, isolation par tenant.
 - **Frontend desktop** : pages Clientes / Expedientes / Documentos (liste, détail,
-  formulaires), tableau de bord avec compteurs en direct, 10 tests unitaires (Vitest +
-  React Testing Library — le frontend n'en avait aucun avant).
+  formulaires), tableau de bord avec compteurs en direct.
 - **i18n** : interface en espagnol par défaut (langue du cabinet/client), français
-  disponible via le sélecteur de langue (en haut à droite) — les deux sont tenues à jour
-  en parallèle à chaque nouvel écran.
-- **Déployé** sur le VPS de démo, testé de bout en bout dans un vrai navigateur (pas
-  seulement les tests automatisés).
+  disponible via le sélecteur de langue — persiste maintenant entre rechargements
+  (localStorage).
+- Design responsive vérifié (390px) sur Clientes/Documentos (colonnes secondaires
+  masquées, en-têtes qui s'empilent).
+
+## Fait (Phase 2 — pipeline IA, alertes, notifications)
+
+- **Classification + extraction IA** (`apps/documents/vision.py` + `tasks.py`) : à chaque
+  upload, un appel structuré à Claude vision détermine la catégorie et extrait les
+  champs (nom, numéro de document, dates…). **Pas encore de clé `ANTHROPIC_API_KEY`
+  configurée** — chaque document se retrouve donc en statut « IA no configurada », ce qui
+  est le comportement attendu tant que la clé n'est pas fournie. Dès qu'elle le sera
+  (dans `.env`, aucune modification de code requise), le pipeline tournera pour de vrai.
+- **Écran de validation humaine** : dans l'aperçu d'un document, les champs extraits par
+  l'IA s'affichent avec des cases à cocher — l'utilisateur choisit lesquels appliquer à
+  la fiche client (jamais d'écrasement automatique).
+- **Alertes d'expiration** : nouvelle page Alertas + tuile sur le tableau de bord,
+  listant les documents dont la date d'expiration (`fecha_expiracion`, modifiable à la
+  main tant que l'IA ne la renseigne pas) tombe dans les 90 jours.
+- **Notifications** : panneau cloche dans la barre d'outils (polling 15s) ; le serveur
+  pousse aussi en temps réel sur WebSocket (`apps.notifications.consumers`) mais aucun
+  client WebSocket n'est encore branché côté frontend pour cette passe.
+- **Note technique** : aucun worker Celery n'est déployé (ni en local, ni sur le VPS) —
+  `CELERY_TASK_ALWAYS_EAGER=True` fait tourner les tâches en synchrone dans la requête.
+  Le code reste écrit comme de vraies tâches Celery ; passer à un vrai worker
+  asynchrone plus tard ne demandera qu'un changement de variable d'environnement + un
+  service systemd, sans toucher au code.
+- Corrigé au passage : `config/__init__.py` n'important jamais l'app Celery (bug
+  hérité du squelette initial, qui faisait que `@shared_task` se liait à un broker
+  RabbitMQ par défaut au lieu des settings Django/Redis).
 
 ### Accès démo
 
 - URL : http://cabinet-demo.82.165.110.108.nip.io:8090
 - Identifiants : `ana@cabinet-demo.es` / `lexassist2026`
 
-## Décisions de périmètre (2026-07-19)
+## Décisions de périmètre
 
-- **Application mobile (`mobile-avocat`)** : reportée. On se concentre sur le desktop
-  pour l'instant ; elle sera reprise plus tard, séparément.
-- **Alertes** (expiration passeport/NIE, délais requerimiento) : reportées à la **Phase
-  2**, en même temps que le pipeline IA. Aujourd'hui il n'existe qu'un compteur
-  "requerimientos abiertos" sur le tableau de bord — pas de vraies alertes d'expiration
-  (il n'y a même pas de champ de date d'expiration sur les documents pour l'instant).
-- **Données de démo** : pas de commande `seed_demo_data`. Le client fournit de vrais
-  documents pour un client de test, qui seront uploadés directement via l'app plutôt que
-  générés artificiellement.
+- **Application mobile (`mobile-avocat`)** : reportée, séparément du reste (décision du
+  2026-07-19). Toujours pas commencée.
+- **Données de démo** : pas de commande `seed_demo_data` — le client fournit de vrais
+  documents pour un client de test, uploadés directement via l'app.
 
-## Connu comme non vérifié / non fait
+## Connu comme non fait
 
-- **Design responsive mobile** du desktop : jamais testé sur un écran étroit. Certaines
-  vues ont des classes adaptatives (Expedientes), d'autres non (Clientes, Documentos) —
-  le tableau (MUI DataGrid) en particulier risque de mal s'afficher en dessous d'une
-  certaine largeur.
-- Le choix de langue (ES/FR) ne survit pas à un rechargement de page (retombe sur
-  espagnol) — pas encore persisté.
+- Pas de client WebSocket côté frontend (notifications en polling seulement pour
+  l'instant — le serveur est prêt).
+- Pas de worker Celery déployé (voir note technique ci-dessus) — bloquant uniquement le
+  jour où le volume justifiera de sortir du mode synchrone.
+- Catalogue des procédures/trámites, génération de formulaires officiels (Phase 3) : pas
+  commencés.
 
-## Prochaines étapes (Phase 2, quand on y arrive)
+## Prochaines étapes possibles
 
-- Alertes d'expiration (passeport, NIE, empadronamiento < 3 mois).
-- Pipeline IA documentaire (classification + extraction via Claude vision).
-- Notification temps réel (Channels) + écran de validation humaine des données extraites.
+- Configurer `ANTHROPIC_API_KEY` pour activer le pipeline IA pour de vrai.
+- Phase 3 : catalogue des trámites + checklists, génération de formulaires (EX, taxes 790).
+- Application mobile (`mobile-avocat`).
