@@ -1,7 +1,8 @@
 # LexAssist — État d'avancement
 
-Dernière mise à jour : 2026-07-19. Complète `docs/PLAN_ACTION.md` (le plan initial) en
-donnant une photo de ce qui est réellement fait, testé et déployé à date.
+Dernière mise à jour : 2026-07-19 (import en masse + rapprochement IA + WebSocket).
+Complète `docs/PLAN_ACTION.md` (le plan initial) en donnant une photo de ce qui est
+réellement fait, testé et déployé à date.
 
 ## Fait (Phase 1)
 
@@ -41,6 +42,30 @@ donnant une photo de ce qui est réellement fait, testé et déployé à date.
   hérité du squelette initial, qui faisait que `@shared_task` se liait à un broker
   RabbitMQ par défaut au lieu des settings Django/Redis).
 
+## Fait (upload sans client — rapprochement/création IA + import en masse + WebSocket)
+
+- **Le client n'est plus obligatoire à l'upload** : conforme au parcours décrit dans la
+  proposition initiale (`docs/LexAssist_Presentation_FR.md` §3.1). `procesar_documento`
+  tente, une fois l'IA passée, de rattacher le document à un client existant
+  (correspondance stricte nom + prénom + numéro de document) ou d'en créer un nouveau si
+  les données extraites suffisent ; sinon le document reste « sans client », à traiter à
+  la main. Un document rattaché/créé automatiquement par l'IA porte
+  `cliente_confirmado=False` tant que l'utilisateur ne l'a pas validé (bouton
+  « Confirmar » / « Cambiar cliente » dans l'aperçu du document).
+- **Nouvelle page `/documentos/importar`** : dépôt de plusieurs fichiers d'un coup (upload
+  concurrent limité à 3), barre de progression, résumé final (assignés / créés / sans
+  classer), liste cliquable des documents sans classer.
+- **Client WebSocket branché** (`useNotificacionesSocket`) : le panneau de notifications
+  reçoit maintenant les événements en temps réel (en plus du polling 15s existant),
+  connecté au consumer Channels déjà présent côté serveur.
+- Le flux classique (choisir un client puis uploader depuis sa fiche) reste inchangé et
+  continue de fonctionner à l'identique — les deux approches coexistent.
+- **Toujours limité par l'absence de clé `ANTHROPIC_API_KEY`** : sans elle, chaque document
+  importé finit systématiquement en « sans classer » (l'IA n'a pas pu extraire de nom/
+  numéro) — comportement attendu, pas un bug. Une fois la clé configurée, le
+  rapprochement/la création automatique fonctionneront pour de vrai sans changement de
+  code.
+
 ### Accès démo
 
 - URL : http://cabinet-demo.82.165.110.108.nip.io:8090
@@ -55,10 +80,10 @@ donnant une photo de ce qui est réellement fait, testé et déployé à date.
 
 ## Connu comme non fait
 
-- Pas de client WebSocket côté frontend (notifications en polling seulement pour
-  l'instant — le serveur est prêt).
 - Pas de worker Celery déployé (voir note technique ci-dessus) — bloquant uniquement le
   jour où le volume justifiera de sortir du mode synchrone.
+- « Marquer le dossier complet » (checklist de pièces manquantes par démarche) : reporté
+  à la Phase 3, décision explicite du 2026-07-19.
 - Catalogue des procédures/trámites, génération de formulaires officiels (Phase 3) : pas
   commencés.
 
