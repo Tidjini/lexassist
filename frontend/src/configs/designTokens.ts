@@ -12,7 +12,8 @@ export const ACCENTS = {
 	expedientes: '#3B82F6',
 	documentos: '#4338CA',
 	alertas: '#D97706',
-	requerimientos: '#DC2626'
+	requerimientos: '#DC2626',
+	asistente: '#7C3AED'
 } as const;
 
 // Dégradé signature (login, FAB, boutons héro) — charbon → indigo.

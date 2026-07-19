@@ -43,6 +43,13 @@ export function buildNavigationConfig(t: (key: string) => string): FuseNavItemTy
 			type: 'item',
 			icon: 'lucide:bell',
 			url: '/alertas'
+		},
+		{
+			id: 'asistente',
+			title: t('asistente.tituloPagina'),
+			type: 'item',
+			icon: 'lucide:sparkles',
+			url: '/asistente'
 		}
 	];
 }

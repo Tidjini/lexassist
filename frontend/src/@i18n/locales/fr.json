@@ -237,6 +237,16 @@
 		"expiraHoy": "Expire aujourd'hui",
 		"expiraEn": "Expire dans {{dias}} jours"
 	},
+	"asistente": {
+		"tituloPagina": "Assistant",
+		"subtituloPagina": "Posez une question sur les clients, dossiers ou documents proches de l'expiration",
+		"emptyTitulo": "Démarrez une conversation",
+		"emptyDescripcion": "Par exemple : « Quels passeports expirent dans les 30 prochains jours ? »",
+		"placeholder": "Écrivez votre question…",
+		"enviarBoton": "Envoyer",
+		"pensando": "Réflexion…",
+		"sinClave": "Impossible de répondre : la clé ANTHROPIC_API_KEY n'est pas configurée sur le serveur."
+	},
 	"notificaciones": {
 		"titulo": "Notifications",
 		"vacio": "Aucune notification",

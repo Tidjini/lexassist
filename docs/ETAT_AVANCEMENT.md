@@ -1,6 +1,6 @@
 # LexAssist — État d'avancement
 
-Dernière mise à jour : 2026-07-19 (refonte visuelle + corrections d'usage).
+Dernière mise à jour : 2026-07-19 (Phase 4 — Assistant, structure sans clé API).
 Complète `docs/PLAN_ACTION.md` (le plan initial) en donnant une photo de ce qui est
 réellement fait, testé et déployé à date.
 
@@ -85,6 +85,33 @@ réellement fait, testé et déployé à date.
 - Deux ajustements visuels mineurs (rayon des coins des tableaux, taille des icônes de
   fichier) suite aux retours de Lucia.
 
+## Fait (Phase 4 — Assistant conversationnel, structure sans clé API)
+
+- **Décision du 2026-07-19** : la Phase 3 (catalogue des trámites, checklists, génération
+  de formulaires) est repoussée en backlog, non abandonnée. On passe directement à la
+  Phase 4 du plan initial (`docs/PLAN_ACTION.md` §4 — Assistant), sans le volet
+  `mobile-avocat`/vocal qui y était rattaché (mobile toujours différé).
+- **Nouvelle app `apps/assistant`** : `Conversacion`/`Mensaje` (une conversation par
+  utilisateur), 4 outils Claude (tool use) branchés sur les données réelles du cabinet —
+  `buscar_clientes`, `listar_expedientes`, `documentos_por_expirar` (même logique que
+  la page Alertas), `agregar_nota_expediente` (écrit dans `Dossier.notes`). Boucle
+  tool-use complète côté serveur (`apps/assistant/service.py`), jusqu'à 5 aller-retours
+  avant réponse finale.
+- **Nouvelle page `/asistente`** : interface de chat (bulles utilisateur/assistant),
+  historique persistant, état dégradé propre si la clé manque (même pattern que le
+  pipeline documentaire : le message de l'utilisateur est quand même enregistré, seule la
+  réponse manque, avec un message explicite au lieu d'un blocage silencieux).
+- **Différence importante avec les phases précédentes** : contrairement au pipeline
+  documentaire (qui peut tourner « à vide » et rester démontrable), un assistant
+  conversationnel sans clé Anthropic n'a **rien à démontrer** — la mécanique (recherche
+  d'outils, boucle de dispatch, persistance) est testée unitairement à fond côté serveur
+  (25 tests, y compris la boucle tool-use avec client Anthropic simulé) et vérifiée en
+  navigateur réel pour le chemin « sans clé », mais **les réponses de l'IA elles-mêmes
+  n'ont pas pu être testées** faute de clé.
+- Décision explicite de l'utilisateur (2026-07-19) : construire la structure maintenant
+  sans clé plutôt que d'attendre — la clé pourra être ajoutée plus tard sans changement de
+  code (même mécanisme que Phase 2).
+
 ### Accès démo
 
 - URL : http://cabinet-demo.82.165.110.108.nip.io:8090
@@ -101,13 +128,16 @@ réellement fait, testé et déployé à date.
 
 - Pas de worker Celery déployé (voir note technique ci-dessus) — bloquant uniquement le
   jour où le volume justifiera de sortir du mode synchrone.
-- « Marquer le dossier complet » (checklist de pièces manquantes par démarche) : reporté
-  à la Phase 3, décision explicite du 2026-07-19.
-- Catalogue des procédures/trámites, génération de formulaires officiels (Phase 3) : pas
-  commencés.
+- Catalogue des procédures/trámites, checklist « dossier complet », génération de
+  formulaires officiels (contenu de la Phase 3 originale) : en backlog, reporté après la
+  Phase 4, décision explicite du 2026-07-19.
+- L'assistant conversationnel (Phase 4) n'a jamais réellement répondu — aucune clé
+  `ANTHROPIC_API_KEY` n'a encore été testée dessus.
 
 ## Prochaines étapes possibles
 
-- Configurer `ANTHROPIC_API_KEY` pour activer le pipeline IA pour de vrai.
-- Phase 3 : catalogue des trámites + checklists, génération de formulaires (EX, taxes 790).
+- Configurer une vraie `ANTHROPIC_API_KEY` pour activer le pipeline IA (Phase 2) **et**
+  l'assistant (Phase 4) pour de vrai — aucun changement de code requis dans les deux cas.
+- Backlog Phase 3 : catalogue des trámites + checklists, génération de formulaires
+  (EX, taxes 790).
 - Application mobile (`mobile-avocat`).

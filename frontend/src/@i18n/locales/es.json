@@ -237,6 +237,16 @@
 		"expiraHoy": "Caduca hoy",
 		"expiraEn": "Caduca en {{dias}} días"
 	},
+	"asistente": {
+		"tituloPagina": "Asistente",
+		"subtituloPagina": "Pregunte por clientes, expedientes o documentos próximos a caducar",
+		"emptyTitulo": "Empiece una conversación",
+		"emptyDescripcion": "Por ejemplo: «¿Qué pasaportes caducan en los próximos 30 días?»",
+		"placeholder": "Escriba su pregunta…",
+		"enviarBoton": "Enviar",
+		"pensando": "Pensando…",
+		"sinClave": "No se ha podido responder: la clave ANTHROPIC_API_KEY no está configurada en el servidor."
+	},
 	"notificaciones": {
 		"titulo": "Notificaciones",
 		"vacio": "No hay notificaciones",
