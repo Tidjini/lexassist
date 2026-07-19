@@ -178,6 +178,14 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = TIME_ZONE
 
+# Aucun worker Celery n'est déployé (ni en dev, ni sur le VPS démo) : les tâches
+# s'exécutent en synchrone dans la requête (mode "eager"), pas de queue Redis à gérer.
+# Le code métier (apps.documents.tasks) reste écrit comme des vraies tâches Celery —
+# passer à un vrai worker asynchrone plus tard ne demande que CELERY_TASK_ALWAYS_EAGER=
+# False dans .env + un service systemd worker, sans toucher au code.
+CELERY_TASK_ALWAYS_EAGER = env.bool("CELERY_TASK_ALWAYS_EAGER", default=True)
+CELERY_TASK_EAGER_PROPAGATES = False
+
 # Tâches périodiques (alertes d'expiration, délais requerimientos — Phase 3).
 # Chaque entrée sera ajoutée au fil des phases ; vide pour l'instant.
 CELERY_BEAT_SCHEDULE = {}

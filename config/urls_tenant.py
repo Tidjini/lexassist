@@ -7,6 +7,7 @@ urlpatterns = [
     path("api/", include("apps.clients.urls")),
     path("api/", include("apps.dossiers.urls")),
     path("api/", include("apps.documents.urls")),
+    path("api/", include("apps.notifications.urls")),
     path("api/", include("apps.procedures.urls")),
     path("api/", include("apps.formulaires.urls")),
     path("api/", include("apps.assistant.urls")),

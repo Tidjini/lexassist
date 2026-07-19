@@ -92,3 +92,96 @@ class TestDocumentUpload:
             )
             assert response.status_code == 200
             assert response.data["count"] == 1
+
+
+@pytest.mark.django_db
+class TestDocumentUploadDeclencheIA:
+    def test_upload_sans_clave_ia_termina_en_sin_clave(self, cabinet, avocat):
+        """ANTHROPIC_API_KEY vide dans l'env de test : le document uploadé doit
+        terminer en estado_ia=SIN_CLAVE (pas de crash, pas de 500). Le
+        transaction.on_commit() de perform_create ne se déclenche pas tout seul sous le
+        rollback standard de pytest-django — captureOnCommitCallbacks(execute=True) est
+        le mécanisme officiel de Django pour l'exercer sans passer en transaction=True
+        (qui casse le flush de teardown avec les schémas django-tenants)."""
+        from django.test import TestCase
+
+        with schema_context(cabinet.schema_name):
+            client = ClientFactory()
+            fichier = SimpleUploadedFile("nie.pdf", b"%PDF-1.4 contenu", content_type="application/pdf")
+            with TestCase.captureOnCommitCallbacks(execute=True):
+                response = appeler(
+                    "post", avocat, "/api/documentos/",
+                    {"cliente": client.id, "categorie": "NIE", "fichier": fichier},
+                )
+            assert response.status_code == 201
+            documento = Document.objects.get(id=response.data["id"])
+            assert documento.estado_ia == Document.EstadoIA.SIN_CLAVE
+
+
+def appeler_action(methode, user, url, pk, action, data=None, format="json"):
+    factory = APIRequestFactory()
+    request = getattr(factory, methode)(url, data, format=format)
+    force_authenticate(request, user=user)
+    view = DocumentViewSet.as_view({methode: action})
+    return view(request, pk=pk) if pk is not None else view(request)
+
+
+@pytest.mark.django_db
+class TestAplicarAClienteYAlertas:
+    def test_aplica_los_campos_elegidos_al_cliente(self, cabinet, avocat):
+        with schema_context(cabinet.schema_name):
+            client = ClientFactory(prenom="Vieux", nom="Nom")
+            documento = DocumentFactory(
+                cliente=client,
+                categoria_sugerida=Document.Categorie.NIE,
+                datos_extraidos={
+                    "nombre": "Maria", "apellidos": "Garcia",
+                    "numero_documento": "X1234567A", "fecha_nacimiento": None, "nacionalidad": None,
+                },
+            )
+
+            response = appeler_action(
+                "post", avocat, f"/api/documentos/{documento.id}/aplicar_a_cliente/", documento.id,
+                "aplicar_a_cliente", data={"campos": ["nombre", "apellidos", "numero_documento"]},
+            )
+
+            assert response.status_code == 200
+            client.refresh_from_db()
+            assert client.prenom == "Maria"
+            assert client.nom == "Garcia"
+            assert client.numero_nie == "X1234567A"
+
+    def test_no_toca_campos_no_elegidos(self, cabinet, avocat):
+        with schema_context(cabinet.schema_name):
+            client = ClientFactory(prenom="Vieux")
+            documento = DocumentFactory(
+                cliente=client, datos_extraidos={"nombre": "Maria", "apellidos": None,
+                                                  "numero_documento": None, "fecha_nacimiento": None,
+                                                  "nacionalidad": None},
+            )
+
+            appeler_action(
+                "post", avocat, f"/api/documentos/{documento.id}/aplicar_a_cliente/", documento.id,
+                "aplicar_a_cliente", data={"campos": []},
+            )
+
+            client.refresh_from_db()
+            assert client.prenom == "Vieux"
+
+    def test_alertas_lista_documentos_por_vencer(self, cabinet, avocat):
+        from datetime import timedelta
+        from django.utils import timezone
+
+        with schema_context(cabinet.schema_name):
+            hoy = timezone.localdate()
+            DocumentFactory(fecha_expiracion=hoy + timedelta(days=10))
+            DocumentFactory(fecha_expiracion=hoy - timedelta(days=5))  # déjà expiré
+            DocumentFactory(fecha_expiracion=hoy + timedelta(days=365))  # trop loin
+            DocumentFactory(fecha_expiracion=None)
+
+            response = appeler_action(
+                "get", avocat, "/api/documentos/alertas/", None, "alertas",
+            )
+
+            assert response.status_code == 200
+            assert len(response.data) == 2

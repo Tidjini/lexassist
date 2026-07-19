@@ -9,6 +9,7 @@ import useFuseLayoutSettings from '@fuse/core/FuseLayout/useFuseLayoutSettings';
 import AdjustFontSize from '../../components/AdjustFontSize';
 import FullScreenToggle from '../../components/FullScreenToggle';
 import LanguageSwitcher from '../../components/LanguageSwitcher';
+import NotificationsPanel from '../../components/notifications/NotificationsPanel';
 import NavigationShortcuts from '../../components/navigation/NavigationShortcuts';
 import NavigationSearch from '../../components/navigation/NavigationSearch';
 import QuickPanelToggleButton from '../../components/quickPanel/QuickPanelToggleButton';
@@ -64,6 +65,7 @@ function ToolbarLayout1(props: ToolbarLayout1Props) {
 					</div>
 
 					<div className="flex items-center overflow-x-auto px-2 py-2 md:px-4">
+						<NotificationsPanel />
 						<LanguageSwitcher />
 						<AdjustFontSize />
 						<FullScreenToggle />

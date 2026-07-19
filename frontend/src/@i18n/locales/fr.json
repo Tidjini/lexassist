@@ -109,11 +109,31 @@
 		"columnaTamano": "Taille",
 		"columnaSubido": "Ajouté le",
 		"emptyTitulo": "Pas encore de document",
-		"emptyDescripcion": "Téléversez le premier document d'un client : l'IA le classera automatiquement dans une phase future.",
+		"emptyDescripcion": "Téléversez le premier document d'un client : l'IA le classera et en extraira les données automatiquement.",
 		"emptyAccion": "Téléverser le premier document",
 		"confirmarEliminar": "Supprimer « {{nombre}} » ?",
 		"eliminado": "Document supprimé",
 		"errorEliminar": "Impossible de supprimer le document",
+		"columnaIa": "IA",
+		"ia": {
+			"estadoPendiente": "En attente",
+			"estadoProcesando": "Analyse en cours…",
+			"estadoCompletado": "Analysé",
+			"estadoError": "Erreur",
+			"estadoSinClave": "IA non configurée",
+			"titulo": "Données extraites par l'IA",
+			"categoriaSugerida": "Catégorie suggérée : {{categoria}}",
+			"usarCategoria": "Utiliser cette catégorie",
+			"campoNombre": "Prénom",
+			"campoApellidos": "Nom",
+			"campoNumeroDocumento": "Numéro de document",
+			"campoFechaNacimiento": "Date de naissance",
+			"campoNacionalidad": "Nationalité",
+			"aplicarBoton": "Appliquer au client",
+			"aplicado": "Données appliquées au client",
+			"sinDatos": "Pas encore de données extraites.",
+			"errorPrefijo": "Motif : {{motivo}}"
+		},
 		"categoria": {
 			"PASSEPORT": "Passeport",
 			"NIE": "NIE",
@@ -150,8 +170,27 @@
 		"documentosDesc": "Téléversez une photo : l'IA classe le document, extrait les données et l'archive.",
 		"requerimientosTitulo": "Requerimientos en cours",
 		"requerimientosDesc": "Dossiers en attente de réponse à un requerimiento.",
-		"faseTitulo": "Phase 1 — Prototype",
+		"alertasTitulo": "Alertes de péremption",
+		"alertasDesc": "Documents (passeport, NIE…) qui expirent dans moins de 90 jours.",
+		"faseTitulo": "Phase 2 — IA documentaire",
 		"faseChip": "en cours",
-		"faseDescripcion": "Gestion des clients et des dossiers, envoi de documents et interface adaptée au mobile. Les phases suivantes ajouteront la numérisation intelligente par IA, les checklists par démarche et la génération automatique de formulaires officiels (modèles EX, taxes 790)."
+		"faseDescripcion": "Classification et extraction automatique des documents par IA, alertes de péremption et notifications en temps réel. La clé IA n'est pas encore configurée : les documents téléversés restent marqués « IA non configurée » jusqu'à son activation."
+	},
+	"alertas": {
+		"tituloPagina": "Alertes",
+		"subtituloPagina": "Documents proches de l'expiration (moins de 90 jours)",
+		"columnaDocumento": "Document",
+		"columnaCliente": "Client",
+		"columnaCategoria": "Catégorie",
+		"columnaExpira": "Expiration",
+		"emptyTitulo": "Aucune alerte pour l'instant",
+		"emptyDescripcion": "Aucun document n'expire dans les 90 prochains jours.",
+		"expirado": "Expiré depuis {{dias}} jours",
+		"expiraHoy": "Expire aujourd'hui",
+		"expiraEn": "Expire dans {{dias}} jours"
+	},
+	"notificaciones": {
+		"titulo": "Notifications",
+		"vacio": "Aucune notification"
 	}
 }

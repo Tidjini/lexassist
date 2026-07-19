@@ -36,6 +36,13 @@ export function buildNavigationConfig(t: (key: string) => string): FuseNavItemTy
 			type: 'item',
 			icon: 'lucide:file-text',
 			url: '/documentos'
+		},
+		{
+			id: 'alertas',
+			title: t('alertas.tituloPagina'),
+			type: 'item',
+			icon: 'lucide:bell',
+			url: '/alertas'
 		}
 	];
 }

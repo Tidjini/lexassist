@@ -5,6 +5,7 @@ import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
 import { useTranslation } from 'react-i18next';
 import type { Documento } from '../../api/types';
+import DocumentoValidacionIA from './DocumentoValidacionIA';
 
 type DocumentoPreviewDialogProps = {
 	documento: Documento | null;
@@ -40,6 +41,7 @@ function DocumentoPreviewDialog({ documento, onClose }: DocumentoPreviewDialogPr
 						className="h-[70vh] w-full"
 					/>
 				)}
+				<DocumentoValidacionIA documento={documento} />
 			</DialogContent>
 			<DialogActions className="p-4">
 				<Button

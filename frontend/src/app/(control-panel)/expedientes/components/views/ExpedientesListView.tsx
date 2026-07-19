@@ -77,7 +77,7 @@ function ExpedientesListView() {
 		<>
 			<FusePageSimple
 				header={
-					<div className="flex items-center justify-between p-6">
+					<div className="flex flex-col gap-3 p-6 sm:flex-row sm:items-center sm:justify-between">
 						<div>
 							<Typography
 								variant="h4"

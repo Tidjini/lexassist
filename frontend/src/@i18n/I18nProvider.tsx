@@ -15,14 +15,24 @@ const languages: LanguageType[] = [
 	{ id: 'fr', title: 'Français', flag: 'FR' }
 ];
 
+// Persiste le choix de langue entre rechargements — sans ça, I18nProvider repartait
+// systématiquement de i18n.options.lng ('es') à chaque chargement de page.
+const STORAGE_KEY = 'lexassist-language';
+
+function langueInitiale(): string {
+	const stockee = typeof window !== 'undefined' ? window.localStorage.getItem(STORAGE_KEY) : null;
+	return stockee && languages.some((l) => l.id === stockee) ? stockee : (i18n.options.lng as string);
+}
+
 export function I18nProvider(props: I18nProviderProps) {
 	const { children } = props;
 	const { data: settings, setSettings } = useFuseSettings();
 	const settingsThemeDirection = useMemo(() => settings.direction, [settings]);
-	const [languageId, setLanguageId] = useState(i18n.options.lng);
+	const [languageId, setLanguageId] = useState(langueInitiale);
 
 	const changeLanguage = async (languageId: string) => {
 		setLanguageId(languageId);
+		window.localStorage.setItem(STORAGE_KEY, languageId);
 		await i18n.changeLanguage(languageId);
 	};
 

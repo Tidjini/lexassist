@@ -7,13 +7,22 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
 import IconButton from '@mui/material/IconButton';
+import Chip from '@mui/material/Chip';
 import { DataGrid, type GridColDef, type GridPaginationModel } from '@mui/x-data-grid';
 import { useSnackbar } from 'notistack';
 import { useTranslation } from 'react-i18next';
 import EmptyState from '@/components/EmptyState';
 import { ACCENTS } from '@/configs/designTokens';
+import useThemeMediaQuery from '@fuse/hooks/useThemeMediaQuery';
 import { useDeleteDocumento, useDocumentos } from '../../api/hooks/useDocumentos';
-import { CATEGORIAS, categoriaLabelKey, type CategoriaDocumento, type Documento } from '../../api/types';
+import {
+	CATEGORIAS,
+	categoriaLabelKey,
+	estadoIaInfo,
+	type CategoriaDocumento,
+	type Documento,
+	type EstadoIA
+} from '../../api/types';
 import DocumentoUploadDialog from '../forms/DocumentoUploadDialog';
 import DocumentoPreviewDialog from './DocumentoPreviewDialog';
 
@@ -40,6 +49,7 @@ function DocumentosListView() {
 	});
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [previewDocumento, setPreviewDocumento] = useState<Documento | null>(null);
+	const esMobile = useThemeMediaQuery((theme) => theme.breakpoints.down('sm'));
 
 	const { data, isLoading } = useDocumentos({
 		cliente: clienteFiltro ? Number(clienteFiltro) : undefined,
@@ -71,6 +81,21 @@ function DocumentosListView() {
 			headerName: t('documentos.columnaCategoria'),
 			flex: 0.8,
 			valueGetter: (value: CategoriaDocumento) => t(categoriaLabelKey(value))
+		},
+		{
+			field: 'estado_ia',
+			headerName: t('documentos.columnaIa'),
+			flex: 0.7,
+			renderCell: (params) => {
+				const info = estadoIaInfo(params.value as EstadoIA);
+				return (
+					<Chip
+						size="small"
+						label={info && t(info.labelKey)}
+						color={info?.color}
+					/>
+				);
+			}
 		},
 		{
 			field: 'taille',
@@ -109,7 +134,7 @@ function DocumentosListView() {
 		<>
 			<FusePageSimple
 				header={
-					<div className="flex items-center justify-between p-6">
+					<div className="flex flex-col gap-3 p-6 sm:flex-row sm:items-center sm:justify-between">
 						<div>
 							<Typography
 								variant="h4"
@@ -176,6 +201,7 @@ function DocumentosListView() {
 								disableRowSelectionOnClick
 								onRowClick={(params) => setPreviewDocumento(params.row)}
 								autoHeight
+								columnVisibilityModel={esMobile ? { taille: false, created_at: false } : undefined}
 								sx={{ cursor: 'pointer' }}
 							/>
 						)}

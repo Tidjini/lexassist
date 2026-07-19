@@ -1,5 +1,5 @@
 import api from '@/utils/api';
-import type { CategoriaDocumento, Documento, DocumentoFiltros, PaginatedResponse } from '../types';
+import type { AlertaDocumento, CategoriaDocumento, Documento, DocumentoFiltros, PaginatedResponse } from '../types';
 
 export async function fetchDocumentos(filtros: DocumentoFiltros = {}): Promise<PaginatedResponse<Documento>> {
 	const searchParams = new URLSearchParams();
@@ -37,4 +37,17 @@ export async function subirDocumento(payload: SubirDocumentoPayload): Promise<Do
 
 export async function deleteDocumento(id: number): Promise<void> {
 	await api.delete(`documentos/${id}/`);
+}
+
+export type AplicarAClientePayload = {
+	campos: string[];
+	aplicar_categoria: boolean;
+};
+
+export async function aplicarACliente(id: number, payload: AplicarAClientePayload): Promise<unknown> {
+	return api.post(`documentos/${id}/aplicar_a_cliente/`, { json: payload }).json();
+}
+
+export async function fetchAlertas(): Promise<AlertaDocumento[]> {
+	return api.get('documentos/alertas/').json<AlertaDocumento[]>();
 }

@@ -7,8 +7,10 @@ from apps.dossiers.models import Dossier
 
 class Document(TimeStampedModel):
     """
-    Upload et rangement par catégorie manuelle (Phase 1). La classification et
-    l'extraction automatiques par l'IA (Claude vision) arrivent en Phase 2.
+    Upload et rangement par catégorie manuelle (Phase 1), classification et extraction
+    automatiques par l'IA (Claude vision) en complément (Phase 2, cf. apps.documents.vision
+    et apps.documents.tasks) — la catégorie reste toujours modifiable manuellement, l'IA ne
+    fait que suggérer (`categorie_suggeree`) tant que l'humain n'a pas validé.
     """
 
     class Categorie(models.TextChoices):
@@ -22,6 +24,13 @@ class Document(TimeStampedModel):
         DIPLOME = "DIPLOME", "Diplôme"
         CASIER_JUDICIAIRE = "CASIER_JUDICIAIRE", "Casier judiciaire"
         AUTRE = "AUTRE", "Autre"
+
+    class EstadoIA(models.TextChoices):
+        PENDIENTE = "PENDIENTE", "Pendiente"
+        PROCESANDO = "PROCESANDO", "Procesando"
+        COMPLETADO = "COMPLETADO", "Completado"
+        ERROR = "ERROR", "Error"
+        SIN_CLAVE = "SIN_CLAVE", "Sin clave configurada"
 
     cliente = models.ForeignKey(Client, on_delete=models.CASCADE, related_name="documents")
     dossier = models.ForeignKey(
@@ -40,6 +49,13 @@ class Document(TimeStampedModel):
         on_delete=models.SET_NULL,
         related_name="documents_televerses",
     )
+
+    # Pipeline IA (Phase 2) — voir apps.documents.tasks.procesar_documento.
+    estado_ia = models.CharField(max_length=20, choices=EstadoIA.choices, default=EstadoIA.PENDIENTE)
+    categoria_sugerida = models.CharField(max_length=20, choices=Categorie.choices, blank=True)
+    datos_extraidos = models.JSONField(default=dict, blank=True)
+    fecha_expiracion = models.DateField(null=True, blank=True)
+    error_ia = models.CharField(max_length=255, blank=True)
 
     class Meta:
         ordering = ["-created_at"]

@@ -56,7 +56,7 @@ function ClienteDetailView() {
 		<>
 			<FusePageSimple
 				header={
-					<div className="flex items-center gap-3 p-6">
+					<div className="flex flex-wrap items-center gap-3 p-6">
 						<IconButton onClick={() => navigate('/clientes')}>
 							<FuseSvgIcon>lucide:arrow-left</FuseSvgIcon>
 						</IconButton>

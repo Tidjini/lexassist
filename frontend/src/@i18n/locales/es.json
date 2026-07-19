@@ -109,11 +109,31 @@
 		"columnaTamano": "Tamaño",
 		"columnaSubido": "Subido",
 		"emptyTitulo": "Todavía no hay documentos",
-		"emptyDescripcion": "Suba el primer documento de un cliente: la IA lo clasificará automáticamente en una fase futura.",
+		"emptyDescripcion": "Suba el primer documento de un cliente: la IA lo clasificará y extraerá los datos automáticamente.",
 		"emptyAccion": "Subir el primer documento",
 		"confirmarEliminar": "¿Eliminar «{{nombre}}»?",
 		"eliminado": "Documento eliminado",
 		"errorEliminar": "No se pudo eliminar el documento",
+		"columnaIa": "IA",
+		"ia": {
+			"estadoPendiente": "Pendiente",
+			"estadoProcesando": "Analizando…",
+			"estadoCompletado": "Analizado",
+			"estadoError": "Error",
+			"estadoSinClave": "IA no configurada",
+			"titulo": "Datos extraídos por la IA",
+			"categoriaSugerida": "Categoría sugerida: {{categoria}}",
+			"usarCategoria": "Usar esta categoría",
+			"campoNombre": "Nombre",
+			"campoApellidos": "Apellidos",
+			"campoNumeroDocumento": "Número de documento",
+			"campoFechaNacimiento": "Fecha de nacimiento",
+			"campoNacionalidad": "Nacionalidad",
+			"aplicarBoton": "Aplicar al cliente",
+			"aplicado": "Datos aplicados al cliente",
+			"sinDatos": "Todavía no hay datos extraídos.",
+			"errorPrefijo": "Motivo: {{motivo}}"
+		},
 		"categoria": {
 			"PASSEPORT": "Pasaporte",
 			"NIE": "NIE",
@@ -150,8 +170,27 @@
 		"documentosDesc": "Suba una foto: la IA clasifica el documento, extrae los datos y lo archiva.",
 		"requerimientosTitulo": "Requerimientos abiertos",
 		"requerimientosDesc": "Expedientes en estado de requerimiento, a la espera de una respuesta.",
-		"faseTitulo": "Fase 1 — Prototipo",
+		"alertasTitulo": "Alertas de caducidad",
+		"alertasDesc": "Documentos (pasaporte, NIE…) que caducan en menos de 90 días.",
+		"faseTitulo": "Fase 2 — IA documental",
 		"faseChip": "en curso",
-		"faseDescripcion": "Gestión de clientes y expedientes, subida de documentos y diseño adaptado al móvil. Las siguientes fases añadirán el escaneo inteligente con IA, los checklists por trámite y la generación automática de formularios oficiales (modelos EX, tasas 790)."
+		"faseDescripcion": "Clasificación y extracción automática de documentos por IA, alertas de caducidad y notificaciones en tiempo real. La clave de la IA todavía no está configurada: los documentos subidos quedan marcados «IA no configurada» hasta que se active."
+	},
+	"alertas": {
+		"tituloPagina": "Alertas",
+		"subtituloPagina": "Documentos próximos a caducar (menos de 90 días)",
+		"columnaDocumento": "Documento",
+		"columnaCliente": "Cliente",
+		"columnaCategoria": "Categoría",
+		"columnaExpira": "Caducidad",
+		"emptyTitulo": "Sin alertas por ahora",
+		"emptyDescripcion": "Ningún documento caduca en los próximos 90 días.",
+		"expirado": "Caducado hace {{dias}} días",
+		"expiraHoy": "Caduca hoy",
+		"expiraEn": "Caduca en {{dias}} días"
+	},
+	"notificaciones": {
+		"titulo": "Notificaciones",
+		"vacio": "No hay notificaciones"
 	}
 }

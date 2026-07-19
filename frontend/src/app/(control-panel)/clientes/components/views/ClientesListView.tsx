@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import EmptyState from '@/components/EmptyState';
 import { ACCENTS } from '@/configs/designTokens';
 import useDebounce from '@fuse/hooks/useDebounce';
+import useThemeMediaQuery from '@fuse/hooks/useThemeMediaQuery';
 import { useClientes, useDeleteCliente } from '../../api/hooks/useClientes';
 import type { Cliente } from '../../api/types';
 import ClienteFormDialog from '../forms/ClienteFormDialog';
@@ -29,6 +30,7 @@ function ClientesListView() {
 		pageSize: PAGE_SIZE
 	});
 	const [dialogOpen, setDialogOpen] = useState(false);
+	const esMobile = useThemeMediaQuery((theme) => theme.breakpoints.down('sm'));
 
 	const appliquerRecherche = useDebounce((valeur: string) => {
 		setRecherche(valeur);
@@ -102,7 +104,7 @@ function ClientesListView() {
 		<>
 			<FusePageSimple
 				header={
-					<div className="flex items-center justify-between p-6">
+					<div className="flex flex-col gap-3 p-6 sm:flex-row sm:items-center sm:justify-between">
 						<div>
 							<Typography
 								variant="h4"
@@ -170,6 +172,11 @@ function ClientesListView() {
 								disableRowSelectionOnClick
 								onRowClick={(params) => navigate(`/clientes/${params.id}`)}
 								autoHeight
+								columnVisibilityModel={
+									esMobile
+										? { email: false, telephone: false, numero_nie: false, nb_dossiers: false }
+										: undefined
+								}
 								sx={{ cursor: 'pointer' }}
 							/>
 						)}

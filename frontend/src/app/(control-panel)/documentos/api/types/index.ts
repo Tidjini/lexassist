@@ -29,6 +29,32 @@ export function categoriaLabelKey(categoria: CategoriaDocumento) {
 	return CATEGORIAS.find((c) => c.value === categoria)?.labelKey ?? 'documentos.categoria.AUTRE';
 }
 
+export type EstadoIA = 'PENDIENTE' | 'PROCESANDO' | 'COMPLETADO' | 'ERROR' | 'SIN_CLAVE';
+
+export const ESTADOS_IA: {
+	value: EstadoIA;
+	labelKey: string;
+	color: 'default' | 'info' | 'success' | 'error' | 'warning';
+}[] = [
+	{ value: 'PENDIENTE', labelKey: 'documentos.ia.estadoPendiente', color: 'default' },
+	{ value: 'PROCESANDO', labelKey: 'documentos.ia.estadoProcesando', color: 'info' },
+	{ value: 'COMPLETADO', labelKey: 'documentos.ia.estadoCompletado', color: 'success' },
+	{ value: 'ERROR', labelKey: 'documentos.ia.estadoError', color: 'error' },
+	{ value: 'SIN_CLAVE', labelKey: 'documentos.ia.estadoSinClave', color: 'warning' }
+];
+
+export function estadoIaInfo(estado: EstadoIA) {
+	return ESTADOS_IA.find((e) => e.value === estado);
+}
+
+export type CamposExtraidos = {
+	nombre?: string | null;
+	apellidos?: string | null;
+	numero_documento?: string | null;
+	fecha_nacimiento?: string | null;
+	nacionalidad?: string | null;
+};
+
 export type Documento = {
 	id: number;
 	cliente: number;
@@ -41,6 +67,21 @@ export type Documento = {
 	televerse_par: { id: number; displayName: string } | null;
 	created_at: string;
 	updated_at: string;
+	estado_ia: EstadoIA;
+	categoria_sugerida: CategoriaDocumento | '';
+	datos_extraidos: CamposExtraidos;
+	fecha_expiracion: string | null;
+	error_ia: string;
+};
+
+export type AlertaDocumento = {
+	id: number;
+	cliente: number;
+	cliente_nom_complet: string;
+	nom_original: string;
+	categorie: CategoriaDocumento;
+	fecha_expiracion: string;
+	dias_restantes: number;
 };
 
 export type DocumentoFiltros = {

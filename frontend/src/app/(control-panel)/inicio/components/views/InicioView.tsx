@@ -9,11 +9,10 @@ import { useTranslation } from 'react-i18next';
 import useUser from '@auth/useUser';
 import { useClientes } from '../../../clientes/api/hooks/useClientes';
 import { useExpedientes } from '../../../expedientes/api/hooks/useExpedientes';
-import { useDocumentos } from '../../../documentos/api/hooks/useDocumentos';
+import { useAlertas, useDocumentos } from '../../../documentos/api/hooks/useDocumentos';
 
 /**
- * Tableau de bord du cabinet — Phase 1 : tuiles de navigation avec compteurs
- * réels ; les alertes d'expiration (passeport, NIE) arrivent en Phase 2/3.
+ * Tableau de bord du cabinet — tuiles de navigation avec compteurs réels.
  */
 function InicioView() {
 	const { data: user } = useUser();
@@ -27,6 +26,7 @@ function InicioView() {
 		statut: 'REQUERIMIENTO',
 		page: 1
 	});
+	const { data: alertasData, isLoading: alertasLoading } = useAlertas();
 
 	const tiles = [
 		{
@@ -60,6 +60,14 @@ function InicioView() {
 			url: '/expedientes?estado=REQUERIMIENTO',
 			cuenta: requerimientosData?.count,
 			cargando: requerimientosLoading
+		},
+		{
+			icon: 'lucide:calendar-clock',
+			title: t('inicio.alertasTitulo'),
+			description: t('inicio.alertasDesc'),
+			url: '/alertas',
+			cuenta: alertasData?.length,
+			cargando: alertasLoading
 		}
 	];
 
