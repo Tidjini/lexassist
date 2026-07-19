@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useSearchParams } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
 import FusePageSimple from '@fuse/core/FusePageSimple';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import Typography from '@mui/material/Typography';
@@ -39,6 +39,7 @@ function formatearTamano(bytes: number) {
 
 function DocumentosListView() {
 	const { t, i18n } = useTranslation();
+	const navigate = useNavigate();
 	const { enqueueSnackbar } = useSnackbar();
 	const [searchParams] = useSearchParams();
 	const clienteFiltro = searchParams.get('cliente');
@@ -85,6 +86,25 @@ function DocumentosListView() {
 
 	const columns: GridColDef<Documento>[] = [
 		{ field: 'nom_original', headerName: t('documentos.columnaArchivo'), flex: 1.2 },
+		{
+			field: 'cliente_nom_complet',
+			headerName: t('clientes.columnaCliente'),
+			flex: 1,
+			renderCell: (params) => (
+				<div className="flex items-center gap-1.5">
+					<Typography variant="body2">
+						{params.row.cliente === null ? t('documentos.sinAsignar') : params.value}
+					</Typography>
+					{params.row.cliente !== null && !params.row.cliente_confirmado && (
+						<Chip
+							size="small"
+							color="warning"
+							label={t('documentos.porConfirmar')}
+						/>
+					)}
+				</div>
+			)
+		},
 		{
 			field: 'categorie',
 			headerName: t('documentos.columnaCategoria'),
@@ -153,14 +173,23 @@ function DocumentosListView() {
 							</Typography>
 							<Typography color="text.secondary">{t('documentos.subtituloPagina')}</Typography>
 						</div>
-						<Button
-							variant="contained"
-							color="primary"
-							startIcon={<FuseSvgIcon>lucide:upload</FuseSvgIcon>}
-							onClick={() => setDialogOpen(true)}
-						>
-							{t('documentos.subirDocumento')}
-						</Button>
+						<div className="flex flex-col gap-2 sm:flex-row">
+							<Button
+								variant="outlined"
+								startIcon={<FuseSvgIcon size={18}>lucide:upload-cloud</FuseSvgIcon>}
+								onClick={() => navigate('/documentos/importar')}
+							>
+								{t('documentos.importacionMasiva')}
+							</Button>
+							<Button
+								variant="contained"
+								color="primary"
+								startIcon={<FuseSvgIcon>lucide:upload</FuseSvgIcon>}
+								onClick={() => setDialogOpen(true)}
+							>
+								{t('documentos.subirDocumento')}
+							</Button>
+						</div>
 					</div>
 				}
 				content={

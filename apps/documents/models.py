@@ -32,7 +32,12 @@ class Document(TimeStampedModel):
         ERROR = "ERROR", "Error"
         SIN_CLAVE = "SIN_CLAVE", "Sin clave configurada"
 
-    cliente = models.ForeignKey(Client, on_delete=models.CASCADE, related_name="documents")
+    # Nullable : un document peut être uploadé sans client choisi (import en masse) —
+    # apps.documents.tasks.procesar_documento tente alors de le rattacher à un client
+    # existant ou d'en créer un à partir des données extraites par l'IA.
+    cliente = models.ForeignKey(
+        Client, null=True, blank=True, on_delete=models.CASCADE, related_name="documents"
+    )
     dossier = models.ForeignKey(
         Dossier, null=True, blank=True, on_delete=models.SET_NULL, related_name="documents"
     )
@@ -56,6 +61,20 @@ class Document(TimeStampedModel):
     datos_extraidos = models.JSONField(default=dict, blank=True)
     fecha_expiracion = models.DateField(null=True, blank=True)
     error_ia = models.CharField(max_length=255, blank=True)
+
+    # True quand un humain a choisi le client (upload classique, ou confirmation
+    # manuelle) ; False quand c'est procesar_documento qui a rattaché/créé le client
+    # automatiquement et que ça n'a pas encore été validé — cf. apps.documents.tasks.
+    cliente_confirmado = models.BooleanField(default=True)
+
+    # cliente -> champ Client selon la catégorie du document : seules PASSEPORT/NIE/DNI
+    # ont un champ numéro dédié sur Client. Utilisé pour le rapprochement automatique
+    # (apps.documents.tasks) et pour aplicar_a_cliente (apps.documents.views).
+    CHAMP_NUMERO_PAR_CATEGORIE = {
+        Categorie.PASSEPORT: "numero_passeport",
+        Categorie.NIE: "numero_nie",
+        Categorie.DNI: "numero_dni",
+    }
 
     class Meta:
         ordering = ["-created_at"]

@@ -132,7 +132,15 @@
 			"aplicarBoton": "Appliquer au client",
 			"aplicado": "Données appliquées au client",
 			"sinDatos": "Pas encore de données extraites.",
-			"errorPrefijo": "Motif : {{motivo}}"
+			"errorPrefijo": "Motif : {{motivo}}",
+			"clienteTitulo": "Client",
+			"clienteBuscar": "Rechercher un client",
+			"clienteAsignarBoton": "Assigner",
+			"clienteAsociado": "Client : {{nombre}}",
+			"clienteConfirmarBoton": "Confirmer",
+			"clienteCambiarBoton": "Changer de client",
+			"clienteAsignado": "Client assigné",
+			"clienteConfirmado": "Client confirmé"
 		},
 		"categoria": {
 			"PASSEPORT": "Passeport",
@@ -149,16 +157,38 @@
 		"upload": {
 			"titulo": "Téléverser un document",
 			"campoCliente": "Client",
+			"clienteOpcional": "Laissez vide pour que l'IA détermine le client automatiquement.",
 			"campoCategoria": "Catégorie",
 			"seleccionarArchivo": "Choisir un fichier (image ou PDF)",
 			"formatosAceptados": "Formats acceptés : JPG, PNG, WEBP, PDF.",
 			"botonSubir": "Téléverser",
-			"errorFaltan": "Sélectionnez un client et un fichier",
+			"errorFaltan": "Sélectionnez un fichier",
 			"subido": "Document téléversé"
 		},
 		"preview": {
 			"abrirPestana": "Ouvrir dans un nouvel onglet",
 			"cerrar": "Fermer"
+		},
+		"sinAsignar": "Non assigné",
+		"porConfirmar": "À confirmer",
+		"importacionMasiva": "Import en masse",
+		"importacion": {
+			"tituloPagina": "Import en masse",
+			"subtituloPagina": "Téléversez plusieurs documents d'un coup : l'IA détermine le client de chacun.",
+			"seleccionarArchivos": "Sélectionner des fichiers",
+			"iniciarBoton": "Lancer l'import ({{cantidad}})",
+			"progreso": "{{completados}} / {{total}} traités",
+			"estadoPendiente": "En attente",
+			"estadoSubiendo": "Envoi…",
+			"estadoAsignado": "Client assigné",
+			"estadoSinClasificar": "Non classé",
+			"estadoError": "Erreur",
+			"errorSubida": "Ce fichier n'a pas pu être envoyé.",
+			"resumenTitulo": "Résumé",
+			"resumenAsignados": "{{cantidad}} document(s) associés à un client (à confirmer)",
+			"resumenSinClasificar": "{{cantidad}} document(s) non classés",
+			"resumenErrores": "{{cantidad}} document(s) en erreur",
+			"verDocumentos": "Voir les documents"
 		}
 	},
 	"inicio": {

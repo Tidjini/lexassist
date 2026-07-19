@@ -57,7 +57,11 @@ export type CamposExtraidos = {
 
 export type Documento = {
 	id: number;
-	cliente: number;
+	// null : document importé sans client choisi (import en masse) — procesar_documento
+	// tente alors de le rattacher à un client existant ou d'en créer un.
+	cliente: number | null;
+	cliente_nom_complet: string;
+	cliente_confirmado: boolean;
 	dossier: number | null;
 	fichier: string;
 	nom_original: string;

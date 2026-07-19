@@ -132,7 +132,15 @@
 			"aplicarBoton": "Aplicar al cliente",
 			"aplicado": "Datos aplicados al cliente",
 			"sinDatos": "Todavía no hay datos extraídos.",
-			"errorPrefijo": "Motivo: {{motivo}}"
+			"errorPrefijo": "Motivo: {{motivo}}",
+			"clienteTitulo": "Cliente",
+			"clienteBuscar": "Buscar cliente",
+			"clienteAsignarBoton": "Asignar",
+			"clienteAsociado": "Cliente: {{nombre}}",
+			"clienteConfirmarBoton": "Confirmar",
+			"clienteCambiarBoton": "Cambiar cliente",
+			"clienteAsignado": "Cliente asignado",
+			"clienteConfirmado": "Cliente confirmado"
 		},
 		"categoria": {
 			"PASSEPORT": "Pasaporte",
@@ -149,16 +157,38 @@
 		"upload": {
 			"titulo": "Subir documento",
 			"campoCliente": "Cliente",
+			"clienteOpcional": "Déjelo vacío para que la IA determine el cliente automáticamente.",
 			"campoCategoria": "Categoría",
 			"seleccionarArchivo": "Seleccionar archivo (imagen o PDF)",
 			"formatosAceptados": "Formatos aceptados: JPG, PNG, WEBP, PDF.",
 			"botonSubir": "Subir",
-			"errorFaltan": "Seleccione un cliente y un archivo",
+			"errorFaltan": "Seleccione un archivo",
 			"subido": "Documento subido"
 		},
 		"preview": {
 			"abrirPestana": "Abrir en una pestaña",
 			"cerrar": "Cerrar"
+		},
+		"sinAsignar": "Sin asignar",
+		"porConfirmar": "Por confirmar",
+		"importacionMasiva": "Importación masiva",
+		"importacion": {
+			"tituloPagina": "Importación masiva",
+			"subtituloPagina": "Suba varios documentos a la vez: la IA determina el cliente de cada uno.",
+			"seleccionarArchivos": "Seleccionar archivos",
+			"iniciarBoton": "Iniciar importación ({{cantidad}})",
+			"progreso": "{{completados}} / {{total}} procesados",
+			"estadoPendiente": "Pendiente",
+			"estadoSubiendo": "Subiendo…",
+			"estadoAsignado": "Cliente asignado",
+			"estadoSinClasificar": "Sin clasificar",
+			"estadoError": "Error",
+			"errorSubida": "No se pudo subir este archivo.",
+			"resumenTitulo": "Resumen",
+			"resumenAsignados": "{{cantidad}} documento(s) asociados a un cliente (a confirmar)",
+			"resumenSinClasificar": "{{cantidad}} documento(s) sin clasificar",
+			"resumenErrores": "{{cantidad}} documento(s) con error",
+			"verDocumentos": "Ver documentos"
 		}
 	},
 	"inicio": {

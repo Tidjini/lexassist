@@ -79,3 +79,92 @@ class TestProcesarDocumento:
     def test_document_inexistant_ne_leve_pas(self, cabinet):
         with schema_context(cabinet.schema_name):
             procesar_documento(999999, cabinet.schema_name)
+
+
+@pytest.mark.django_db
+class TestRapprochementClienteAutomatique:
+    """Upload sans client (import en masse, cf. docs/LexAssist_Presentation_FR.md §3.1) :
+    procesar_documento doit rattacher un client existant, en créer un nouveau, ou laisser
+    le document sans client selon ce que l'extraction IA a trouvé."""
+
+    def _resultat(self, **campos_override):
+        campos = {
+            "nombre": "Maria", "apellidos": "Garcia", "numero_documento": "X1234567A",
+            "fecha_nacimiento": "1990-05-01", "nacionalidad": "Marroquí",
+        }
+        campos.update(campos_override)
+        return {"categoria": "NIE", "campos": campos, "fecha_expiracion": None}
+
+    def test_rattache_a_un_client_existant_qui_correspond(self, cabinet):
+        with schema_context(cabinet.schema_name):
+            from apps.clients.factories import ClientFactory
+
+            client_existant = ClientFactory(nom="Garcia", prenom="Maria", numero_nie="X1234567A")
+            documento = DocumentFactory(cliente=None)
+
+            with patch("apps.documents.tasks.vision.analizar_documento", return_value=self._resultat()):
+                procesar_documento(documento.id, cabinet.schema_name)
+
+            documento.refresh_from_db()
+            assert documento.cliente_id == client_existant.id
+            assert documento.cliente_confirmado is False
+
+    def test_cree_un_nouveau_client_si_aucune_correspondance(self, cabinet):
+        with schema_context(cabinet.schema_name):
+            from apps.clients.models import Client
+
+            documento = DocumentFactory(cliente=None)
+
+            with patch("apps.documents.tasks.vision.analizar_documento", return_value=self._resultat()):
+                procesar_documento(documento.id, cabinet.schema_name)
+
+            documento.refresh_from_db()
+            assert documento.cliente is not None
+            assert documento.cliente.nom == "Garcia"
+            assert documento.cliente.prenom == "Maria"
+            assert documento.cliente.numero_nie == "X1234567A"
+            assert documento.cliente_confirmado is False
+            assert Client.objects.filter(numero_nie="X1234567A").count() == 1
+
+    def test_laisse_sans_client_si_donnees_insuffisantes(self, cabinet):
+        with schema_context(cabinet.schema_name):
+            documento = DocumentFactory(cliente=None)
+            resultat = self._resultat(numero_documento=None)
+
+            with patch("apps.documents.tasks.vision.analizar_documento", return_value=resultat):
+                procesar_documento(documento.id, cabinet.schema_name)
+
+            documento.refresh_from_db()
+            assert documento.cliente is None
+            assert documento.estado_ia == Document.EstadoIA.COMPLETADO
+
+    def test_laisse_sans_client_si_plusieurs_correspondances(self, cabinet):
+        with schema_context(cabinet.schema_name):
+            from apps.clients.factories import ClientFactory
+
+            ClientFactory(nom="Garcia", prenom="Maria", numero_nie="X1234567A")
+            ClientFactory(nom="Garcia", prenom="Maria", numero_nie="X1234567A")
+            documento = DocumentFactory(cliente=None)
+
+            with patch("apps.documents.tasks.vision.analizar_documento", return_value=self._resultat()):
+                procesar_documento(documento.id, cabinet.schema_name)
+
+            documento.refresh_from_db()
+            assert documento.cliente is None
+
+    def test_ne_touche_pas_a_un_client_deja_choisi_a_l_upload(self, cabinet):
+        with schema_context(cabinet.schema_name):
+            from apps.clients.factories import ClientFactory
+
+            client_upload = ClientFactory(nom="Autre", prenom="Client")
+            # Un client "Maria Garcia" existe aussi, mais ne doit pas remplacer le choix
+            # explicite fait à l'upload.
+            ClientFactory(nom="Garcia", prenom="Maria", numero_nie="X1234567A")
+            documento = DocumentFactory(cliente=client_upload)
+
+            with patch("apps.documents.tasks.vision.analizar_documento", return_value=self._resultat()):
+                procesar_documento(documento.id, cabinet.schema_name)
+
+            documento.refresh_from_db()
+            assert documento.cliente_id == client_upload.id
+            assert documento.cliente_confirmado is True

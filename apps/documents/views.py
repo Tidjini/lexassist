@@ -5,6 +5,7 @@ from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -12,15 +13,6 @@ from rest_framework.response import Response
 from .models import Document
 from .serializers import AlertaDocumentoSerializer, AplicarAClienteSerializer, DocumentSerializer
 from .tasks import procesar_documento
-
-# Client -> champ selon la catégorie du document (seules PASSEPORT/NIE/DNI ont un champ
-# numéro dédié sur Client ; les autres catégories n'ont pas d'équivalent, on ignore
-# numero_documento pour elles plutôt que de deviner où l'écrire).
-CHAMP_NUMERO_PAR_CATEGORIE = {
-    Document.Categorie.PASSEPORT: "numero_passeport",
-    Document.Categorie.NIE: "numero_nie",
-    Document.Categorie.DNI: "numero_dni",
-}
 
 
 class DocumentViewSet(viewsets.ModelViewSet):
@@ -50,6 +42,10 @@ class DocumentViewSet(viewsets.ModelViewSet):
         appliquer). Ne touche jamais un champ non demandé.
         """
         documento = self.get_object()
+
+        if documento.cliente_id is None:
+            raise ValidationError("Este documento no tiene cliente asignado todavía.")
+
         serializer = AplicarAClienteSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         campos = serializer.validated_data["campos"]
@@ -72,7 +68,7 @@ class DocumentViewSet(viewsets.ModelViewSet):
             cliente.nationalite = datos["nacionalidad"]
             actualizados.append("nationalite")
         if "numero_documento" in campos and datos.get("numero_documento"):
-            champ = CHAMP_NUMERO_PAR_CATEGORIE.get(documento.categoria_sugerida)
+            champ = Document.CHAMP_NUMERO_PAR_CATEGORIE.get(documento.categoria_sugerida)
             if champ:
                 setattr(cliente, champ, datos["numero_documento"])
                 actualizados.append(champ)
@@ -87,6 +83,27 @@ class DocumentViewSet(viewsets.ModelViewSet):
         from apps.clients.serializers import ClientSerializer
 
         return Response(ClientSerializer(cliente).data)
+
+    @action(detail=True, methods=["post"])
+    def confirmar_cliente(self, request, pk=None):
+        """Le client rattaché/créé automatiquement par l'IA (cliente_confirmado=False)
+        est le bon — rien à changer, on marque juste comme validé."""
+        documento = self.get_object()
+
+        if documento.cliente_id is None:
+            raise ValidationError("Este documento no tiene cliente asignado todavía.")
+
+        documento.cliente_confirmado = True
+        documento.save(update_fields=["cliente_confirmado", "updated_at"])
+        return Response(DocumentSerializer(documento, context=self.get_serializer_context()).data)
+
+    @action(detail=False, methods=["get"])
+    def sin_clasificar(self, request):
+        """Documents importés sans client choisi, que l'IA n'a pas pu rattacher ni
+        transformer en nouveau client (données insuffisantes ou correspondance
+        ambiguë) — à assigner manuellement."""
+        documentos = Document.objects.filter(cliente__isnull=True).order_by("-created_at")
+        return Response(DocumentSerializer(documentos, many=True, context=self.get_serializer_context()).data)
 
     @action(detail=False, methods=["get"])
     def alertas(self, request):

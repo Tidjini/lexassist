@@ -3,10 +3,61 @@ from datetime import date
 from celery import shared_task
 from django_tenants.utils import schema_context
 
+from apps.clients.models import Client
 from apps.notifications.models import Notification
 from apps.notifications.utils import notificar
 from . import vision
 from .models import Document
+
+
+def _fecha_o_none(valeur):
+    if not valeur:
+        return None
+    try:
+        return date.fromisoformat(valeur)
+    except ValueError:
+        return None
+
+
+def _buscar_o_crear_cliente(campos, categoria):
+    """
+    Rapprochement strict pour l'import en masse (upload sans client, cf. §3.1 de la
+    présentation) : nom+prénom ET numéro de document doivent correspondre exactement à
+    un client existant. En cas de correspondance ambiguë (plusieurs clients) ou de
+    données insuffisantes, on ne devine jamais — on laisse le document sans client,
+    à assigner à la main (voir DocumentViewSet.sin_clasificar).
+
+    Retourne (client_ou_None, creado: bool).
+    """
+    nombre = (campos.get("nombre") or "").strip()
+    apellidos = (campos.get("apellidos") or "").strip()
+    numero_documento = (campos.get("numero_documento") or "").strip()
+
+    if not (nombre and apellidos and numero_documento):
+        return None, False
+
+    champ_numero = Document.CHAMP_NUMERO_PAR_CATEGORIE.get(categoria)
+    if not champ_numero:
+        return None, False
+
+    candidatos = list(
+        Client.objects.filter(nom__iexact=apellidos, prenom__iexact=nombre, **{champ_numero: numero_documento})
+    )
+
+    if len(candidatos) == 1:
+        return candidatos[0], False
+
+    if len(candidatos) > 1:
+        return None, False
+
+    cliente = Client.objects.create(
+        nom=apellidos,
+        prenom=nombre,
+        date_naissance=_fecha_o_none(campos.get("fecha_nacimiento")),
+        nationalite=campos.get("nacionalidad") or "",
+        **{champ_numero: numero_documento},
+    )
+    return cliente, True
 
 
 @shared_task
@@ -36,25 +87,43 @@ def procesar_documento(document_id, schema_name):
                 documento.fichier.close()
 
             resultado = vision.analizar_documento(fichier_bytes, documento.content_type)
+            campos = resultado["campos"]
 
             documento.categoria_sugerida = resultado["categoria"]
-            documento.datos_extraidos = resultado["campos"]
-            fecha = resultado.get("fecha_expiracion")
-            documento.fecha_expiracion = date.fromisoformat(fecha) if fecha else None
+            documento.datos_extraidos = campos
+            documento.fecha_expiracion = _fecha_o_none(resultado.get("fecha_expiracion"))
             documento.estado_ia = Document.EstadoIA.COMPLETADO
             documento.error_ia = ""
-            documento.save(
-                update_fields=[
-                    "categoria_sugerida",
-                    "datos_extraidos",
-                    "fecha_expiracion",
-                    "estado_ia",
-                    "error_ia",
-                    "updated_at",
-                ]
-            )
+
+            campos_a_sauvegarder = [
+                "categoria_sugerida",
+                "datos_extraidos",
+                "fecha_expiracion",
+                "estado_ia",
+                "error_ia",
+                "updated_at",
+            ]
+
+            # Import sans client (cf. DocumentoUploadDialog/page d'import en masse) :
+            # on tente le rapprochement/la création automatique.
+            if documento.cliente_id is None:
+                cliente, creado = _buscar_o_crear_cliente(campos, documento.categoria_sugerida)
+                if cliente is not None:
+                    documento.cliente = cliente
+                    documento.cliente_confirmado = False
+                    campos_a_sauvegarder += ["cliente", "cliente_confirmado"]
+                    mensaje = (
+                        f"Documento «{documento.nom_original}»: cliente nuevo «{cliente}» creado."
+                        if creado
+                        else f"Documento «{documento.nom_original}»: asociado al cliente «{cliente}»."
+                    )
+                else:
+                    mensaje = f"Documento «{documento.nom_original}» analizado: sin cliente, revisar manualmente."
+            else:
+                mensaje = f"Documento «{documento.nom_original}» analizado."
+
+            documento.save(update_fields=campos_a_sauvegarder)
             tipo = Notification.Tipo.DOCUMENTO_PROCESADO
-            mensaje = f"Documento «{documento.nom_original}» analizado."
         except RuntimeError as e:
             documento.estado_ia = Document.EstadoIA.SIN_CLAVE
             documento.error_ia = str(e)

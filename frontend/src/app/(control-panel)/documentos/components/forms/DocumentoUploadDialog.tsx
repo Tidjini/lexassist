@@ -49,7 +49,7 @@ function DocumentoUploadDialog(props: DocumentoUploadDialogProps) {
 	async function onSubmit() {
 		const clienteId = clienteFijo?.id ?? cliente?.id;
 
-		if (!clienteId || !fichier) {
+		if (!fichier) {
 			enqueueSnackbar(t('documentos.upload.errorFaltan'), { variant: 'error' });
 			return;
 		}
@@ -81,21 +81,30 @@ function DocumentoUploadDialog(props: DocumentoUploadDialogProps) {
 						fullWidth
 					/>
 				) : (
-					<Autocomplete
-						options={clientesData?.results ?? []}
-						getOptionLabel={(c) => `${c.prenom} ${c.nom}`}
-						getOptionKey={(c) => c.id}
-						value={cliente}
-						onInputChange={(_e, valeur) => setBusquedaCliente(valeur)}
-						onChange={(_e, valeur) => setCliente(valeur)}
-						slotProps={{ popper: { style: { zIndex: 10000 } } }}
-						renderInput={(params) => (
-							<TextField
-								{...params}
-								label={t('documentos.upload.campoCliente')}
-							/>
-						)}
-					/>
+					<>
+						<Autocomplete
+							options={clientesData?.results ?? []}
+							getOptionLabel={(c) => `${c.prenom} ${c.nom}`}
+							getOptionKey={(c) => c.id}
+							value={cliente}
+							onInputChange={(_e, valeur) => setBusquedaCliente(valeur)}
+							onChange={(_e, valeur) => setCliente(valeur)}
+							slotProps={{ popper: { style: { zIndex: 10000 } } }}
+							renderInput={(params) => (
+								<TextField
+									{...params}
+									label={t('documentos.upload.campoCliente')}
+								/>
+							)}
+						/>
+						<Typography
+							variant="caption"
+							color="text.secondary"
+							className="-mt-2"
+						>
+							{t('documentos.upload.clienteOpcional')}
+						</Typography>
+					</>
 				)}
 
 				<TextField

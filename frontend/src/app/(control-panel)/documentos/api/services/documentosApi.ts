@@ -17,19 +17,23 @@ export async function fetchDocumentos(filtros: DocumentoFiltros = {}): Promise<P
 }
 
 export type SubirDocumentoPayload = {
-	cliente: number;
+	// Optionnel : laissé vide, l'IA tente de rattacher ou de créer le client
+	// automatiquement (voir apps.documents.tasks.procesar_documento) — c'est le principe
+	// de la page d'import en masse.
+	cliente?: number;
 	dossier?: number;
-	categorie: CategoriaDocumento;
+	categorie?: CategoriaDocumento;
 	fichier: File;
 };
 
 export async function subirDocumento(payload: SubirDocumentoPayload): Promise<Documento> {
 	const datos = new FormData();
-	datos.set('cliente', String(payload.cliente));
+
+	if (payload.cliente) datos.set('cliente', String(payload.cliente));
 
 	if (payload.dossier) datos.set('dossier', String(payload.dossier));
 
-	datos.set('categorie', payload.categorie);
+	datos.set('categorie', payload.categorie ?? 'AUTRE');
 	datos.set('fichier', payload.fichier);
 
 	return api.post('documentos/', { body: datos }).json<Documento>();
@@ -50,4 +54,16 @@ export async function aplicarACliente(id: number, payload: AplicarAClientePayloa
 
 export async function fetchAlertas(): Promise<AlertaDocumento[]> {
 	return api.get('documentos/alertas/').json<AlertaDocumento[]>();
+}
+
+export async function confirmarCliente(id: number): Promise<Documento> {
+	return api.post(`documentos/${id}/confirmar_cliente/`).json<Documento>();
+}
+
+export async function asignarCliente(id: number, cliente: number): Promise<Documento> {
+	return api.patch(`documentos/${id}/`, { json: { cliente } }).json<Documento>();
+}
+
+export async function fetchSinClasificar(): Promise<Documento[]> {
+	return api.get('documentos/sin_clasificar/').json<Documento[]>();
 }

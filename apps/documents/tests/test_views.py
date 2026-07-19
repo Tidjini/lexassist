@@ -93,6 +93,24 @@ class TestDocumentUpload:
             assert response.status_code == 200
             assert response.data["count"] == 1
 
+    def test_upload_sin_cliente_permitido(self, cabinet, avocat):
+        """Import en masse (docs/LexAssist_Presentation_FR.md §3.1) : on peut uploader
+        sans choisir de client, c'est procesar_documento qui s'en charge."""
+        with schema_context(cabinet.schema_name):
+            fichier = SimpleUploadedFile("nie.pdf", b"%PDF-1.4 contenu", content_type="application/pdf")
+            response = appeler("post", avocat, "/api/documentos/", {"fichier": fichier})
+            assert response.status_code == 201
+            assert response.data["cliente"] is None
+
+    def test_upload_con_dossier_sin_cliente_rejete(self, cabinet, avocat):
+        with schema_context(cabinet.schema_name):
+            dossier = DossierFactory()
+            fichier = SimpleUploadedFile("nie.pdf", b"%PDF-1.4 contenu", content_type="application/pdf")
+            response = appeler(
+                "post", avocat, "/api/documentos/", {"dossier": dossier.id, "fichier": fichier}
+            )
+            assert response.status_code == 400
+
 
 @pytest.mark.django_db
 class TestDocumentUploadDeclencheIA:
@@ -181,6 +199,74 @@ class TestAplicarAClienteYAlertas:
 
             response = appeler_action(
                 "get", avocat, "/api/documentos/alertas/", None, "alertas",
+            )
+
+            assert response.status_code == 200
+            assert len(response.data) == 2
+
+    def test_aplicar_a_cliente_sin_cliente_rejete(self, cabinet, avocat):
+        with schema_context(cabinet.schema_name):
+            documento = DocumentFactory(cliente=None)
+
+            response = appeler_action(
+                "post", avocat, f"/api/documentos/{documento.id}/aplicar_a_cliente/", documento.id,
+                "aplicar_a_cliente", data={"campos": []},
+            )
+
+            assert response.status_code == 400
+
+
+@pytest.mark.django_db
+class TestConfirmarClienteYSinClasificar:
+    def test_confirmar_cliente(self, cabinet, avocat):
+        with schema_context(cabinet.schema_name):
+            client = ClientFactory()
+            documento = DocumentFactory(cliente=client, cliente_confirmado=False)
+
+            response = appeler_action(
+                "post", avocat, f"/api/documentos/{documento.id}/confirmar_cliente/", documento.id,
+                "confirmar_cliente",
+            )
+
+            assert response.status_code == 200
+            documento.refresh_from_db()
+            assert documento.cliente_confirmado is True
+
+    def test_confirmar_cliente_sin_cliente_rejete(self, cabinet, avocat):
+        with schema_context(cabinet.schema_name):
+            documento = DocumentFactory(cliente=None)
+
+            response = appeler_action(
+                "post", avocat, f"/api/documentos/{documento.id}/confirmar_cliente/", documento.id,
+                "confirmar_cliente",
+            )
+
+            assert response.status_code == 400
+
+    def test_patch_cliente_confirme_automatiquement(self, cabinet, avocat):
+        with schema_context(cabinet.schema_name):
+            ancien_client = ClientFactory()
+            nouveau_client = ClientFactory()
+            documento = DocumentFactory(cliente=ancien_client, cliente_confirmado=False)
+
+            response = appeler_action(
+                "patch", avocat, f"/api/documentos/{documento.id}/", documento.id,
+                "partial_update", data={"cliente": nouveau_client.id},
+            )
+
+            assert response.status_code == 200
+            documento.refresh_from_db()
+            assert documento.cliente_id == nouveau_client.id
+            assert documento.cliente_confirmado is True
+
+    def test_sin_clasificar_lista_documentos_sin_cliente(self, cabinet, avocat):
+        with schema_context(cabinet.schema_name):
+            DocumentFactory(cliente=None)
+            DocumentFactory(cliente=None)
+            DocumentFactory(cliente=ClientFactory())
+
+            response = appeler_action(
+                "get", avocat, "/api/documentos/sin_clasificar/", None, "sin_clasificar",
             )
 
             assert response.status_code == 200

@@ -8,6 +8,7 @@ import Divider from '@mui/material/Divider';
 import { useTranslation } from 'react-i18next';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import { useMarcarLeida, useNotificaciones } from './useNotificaciones';
+import { useNotificacionesSocket } from './useNotificacionesSocket';
 import type { Notificacion } from './notificacionesApi';
 
 function NotificationsPanel() {
@@ -15,6 +16,10 @@ function NotificationsPanel() {
 	const [menu, setMenu] = useState<null | HTMLElement>(null);
 	const { data } = useNotificaciones();
 	const marcarLeidaMutation = useMarcarLeida();
+	// Pousse en temps réel (Channels) en plus du polling de useNotificaciones (15s) —
+	// le WebSocket invalide déjà la query notificaciones à réception, ce hook n'a donc
+	// rien de plus à faire ici que de rester monté.
+	useNotificacionesSocket();
 
 	const notificaciones = data?.results ?? [];
 	const noLeidas = notificaciones.filter((n) => !n.leida).length;
