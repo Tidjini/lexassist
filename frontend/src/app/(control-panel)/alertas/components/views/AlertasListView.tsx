@@ -1,11 +1,14 @@
 import { useNavigate } from 'react-router';
 import FusePageSimple from '@fuse/core/FusePageSimple';
+import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
+import Paper from '@mui/material/Paper';
 import { DataGrid, type GridColDef } from '@mui/x-data-grid';
 import { useTranslation } from 'react-i18next';
 import EmptyState from '@/components/EmptyState';
-import { ACCENTS } from '@/configs/designTokens';
+import InitialsAvatar from '@/components/InitialsAvatar';
+import { ACCENTS, DATAGRID_CARD_SX, DATAGRID_SX } from '@/configs/designTokens';
 import ListSkeleton from '@/components/ListSkeleton';
 import { useAlertas } from '../../../documentos/api/hooks/useDocumentos';
 import { categoriaLabelKey, type AlertaDocumento } from '../../../documentos/api/types';
@@ -33,8 +36,47 @@ function AlertasListView() {
 	}
 
 	const columns: GridColDef<AlertaDocumento>[] = [
-		{ field: 'nom_original', headerName: t('alertas.columnaDocumento'), flex: 1.2 },
-		{ field: 'cliente_nom_complet', headerName: t('alertas.columnaCliente'), flex: 1 },
+		{
+			field: 'nom_original',
+			headerName: t('alertas.columnaDocumento'),
+			flex: 1.2,
+			renderCell: (params) => (
+				<div className="flex h-full items-center gap-2.5">
+					<div
+						className="flex items-center justify-center rounded-lg"
+						style={{ width: 32, height: 32, backgroundColor: `${ACCENTS.alertas}29` }}
+					>
+						<FuseSvgIcon
+							size={16}
+							style={{ color: ACCENTS.alertas }}
+						>
+							lucide:calendar-clock
+						</FuseSvgIcon>
+					</div>
+					<Typography
+						variant="body2"
+						className="font-medium"
+					>
+						{params.value}
+					</Typography>
+				</div>
+			)
+		},
+		{
+			field: 'cliente_nom_complet',
+			headerName: t('alertas.columnaCliente'),
+			flex: 1,
+			renderCell: (params) => (
+				<div className="flex h-full items-center gap-2">
+					<InitialsAvatar
+						nombre={params.value as string}
+						accent={ACCENTS.clientes}
+						size={28}
+					/>
+					<Typography variant="body2">{params.value}</Typography>
+				</div>
+			)
+		},
 		{
 			field: 'categorie',
 			headerName: t('alertas.columnaCategoria'),
@@ -89,15 +131,17 @@ function AlertasListView() {
 					)}
 
 					{!isLoading && alertas.length > 0 && (
-						<DataGrid
-							rows={alertas}
-							columns={columns}
-							disableRowSelectionOnClick
-							onRowClick={(params) => navigate(`/clientes/${params.row.cliente}`)}
-							autoHeight
-							hideFooter
-							sx={{ cursor: 'pointer' }}
-						/>
+						<Paper sx={DATAGRID_CARD_SX}>
+							<DataGrid
+								rows={alertas}
+								columns={columns}
+								disableRowSelectionOnClick
+								onRowClick={(params) => navigate(`/clientes/${params.row.cliente}`)}
+								autoHeight
+								hideFooter
+								sx={{ ...DATAGRID_SX, cursor: 'pointer' }}
+							/>
+						</Paper>
 					)}
 				</div>
 			}

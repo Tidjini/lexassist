@@ -25,7 +25,10 @@ const Layout1Config = {
 			display: true
 		},
 		rightSidePanel: {
-			display: true
+			// QuickPanel (widget calendrier/notes générique du template) : pas de bouton
+			// pour l'ouvrir dans la barre d'outils, pas de contenu pertinent pour ce
+			// cabinet — désactivé plutôt que laissé accessible sans point d'entrée.
+			display: false
 		}
 	},
 	form: {

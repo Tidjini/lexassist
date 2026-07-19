@@ -10,12 +10,28 @@ import IconButton from '@mui/material/IconButton';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import ListSkeleton from '@/components/ListSkeleton';
+import InitialsAvatar from '@/components/InitialsAvatar';
+import { ACCENTS } from '@/configs/designTokens';
 import { useSnackbar } from 'notistack';
 import { useTranslation } from 'react-i18next';
 import { useCambiarEstado, useDeleteExpediente, useExpediente } from '../../api/hooks/useExpedientes';
 import { ESTADOS, estadoInfo, type EstadoExpediente } from '../../api/types';
 import { extractErrorMessage } from '@/utils/apiError';
 import ExpedienteFormDialog from '../forms/ExpedienteFormDialog';
+
+function TituloSeccion({ icono, texto }: { icono: string; texto: string }) {
+	return (
+		<div className="mb-3 flex items-center gap-2">
+			<FuseSvgIcon
+				size={18}
+				style={{ color: ACCENTS.expedientes }}
+			>
+				{icono}
+			</FuseSvgIcon>
+			<Typography className="font-semibold">{texto}</Typography>
+		</div>
+	);
+}
 
 function ExpedienteDetailView() {
 	const { expedienteId } = useParams<{ expedienteId: string }>();
@@ -60,6 +76,13 @@ function ExpedienteDetailView() {
 						<IconButton onClick={() => navigate('/expedientes')}>
 							<FuseSvgIcon>lucide:arrow-left</FuseSvgIcon>
 						</IconButton>
+						{expediente && (
+							<InitialsAvatar
+								nombre={expediente.cliente_nom_complet}
+								accent={ACCENTS.clientes}
+								size={48}
+							/>
+						)}
 						<div className="flex-1">
 							<Typography
 								variant="h4"
@@ -118,9 +141,10 @@ function ExpedienteDetailView() {
 						{expediente && (
 							<div className="flex flex-col gap-4">
 								<Paper className="rounded-xl p-6">
-									<Typography className="mb-3 font-semibold">
-										{t('expedientes.detalle.detalles')}
-									</Typography>
+									<TituloSeccion
+										icono="lucide:info"
+										texto={t('expedientes.detalle.detalles')}
+									/>
 									<div className="grid grid-cols-2 gap-4 md:grid-cols-3">
 										<div>
 											<Typography
@@ -163,9 +187,10 @@ function ExpedienteDetailView() {
 								</Paper>
 
 								<Paper className="rounded-xl p-6">
-									<Typography className="mb-3 font-semibold">
-										{t('expedientes.detalle.historial')}
-									</Typography>
+									<TituloSeccion
+										icono="lucide:history"
+										texto={t('expedientes.detalle.historial')}
+									/>
 									{!expediente.evenements || expediente.evenements.length === 0 ? (
 										<Typography
 											variant="body2"

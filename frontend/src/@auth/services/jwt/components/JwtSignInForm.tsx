@@ -1,29 +1,21 @@
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { useMemo } from 'react';
 import { z } from 'zod';
 import _ from 'lodash';
 import TextField from '@mui/material/TextField';
 import FormControl from '@mui/material/FormControl';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
-import Link from '@fuse/core/Link';
 import Button from '@mui/material/Button';
+import { useTranslation } from 'react-i18next';
 import useJwtAuth from '../useJwtAuth';
 
-/**
- * Form Validation Schema
- */
-const schema = z.object({
-	email: z.string().email('You must enter a valid email').nonempty('You must enter an email'),
-	password: z
-		.string()
-		.min(4, 'Password is too short - must be at least 4 chars.')
-		.nonempty('Please enter your password.'),
-	remember: z.boolean().optional()
-});
-
-type FormType = z.infer<typeof schema>;
+type FormType = {
+	email: string;
+	password: string;
+	remember?: boolean;
+};
 
 const defaultValues: FormType = {
 	email: '',
@@ -33,20 +25,25 @@ const defaultValues: FormType = {
 
 function JwtSignInForm() {
 	const { signIn } = useJwtAuth();
+	const { t } = useTranslation();
 
-	const { control, formState, handleSubmit, setValue, setError } = useForm<FormType>({
+	const schema = useMemo(
+		() =>
+			z.object({
+				email: z.string().email(t('auth.errorEmailInvalido')).nonempty(t('auth.errorEmailRequerido')),
+				password: z.string().min(4, t('auth.errorPasswordCorta')).nonempty(t('auth.errorPasswordRequerida')),
+				remember: z.boolean().optional()
+			}),
+		[t]
+	);
+
+	const { control, formState, handleSubmit, setError } = useForm<FormType>({
 		mode: 'onChange',
 		defaultValues,
 		resolver: zodResolver(schema)
 	});
 
 	const { isValid, dirtyFields, errors } = formState;
-
-	useEffect(() => {
-		if (!import.meta.env.DEV) return;
-		setValue('email', 'ana@cabinet-demo.es', { shouldDirty: true, shouldValidate: true });
-		setValue('password', 'DevPass123!', { shouldDirty: true, shouldValidate: true });
-	}, [setValue]);
 
 	function onSubmit(formData: FormType) {
 		const { email, password } = formData;
@@ -83,7 +80,7 @@ function JwtSignInForm() {
 					<TextField
 						{...field}
 						className="mb-6"
-						label="Email"
+						label={t('auth.campoEmail')}
 						autoFocus
 						type="email"
 						error={!!errors.email}
@@ -102,7 +99,7 @@ function JwtSignInForm() {
 					<TextField
 						{...field}
 						className="mb-6"
-						label="Password"
+						label={t('auth.campoPassword')}
 						type="password"
 						error={!!errors.password}
 						helperText={errors?.password?.message}
@@ -113,14 +110,14 @@ function JwtSignInForm() {
 				)}
 			/>
 
-			<div className="flex flex-col items-center justify-center sm:flex-row sm:justify-between">
+			<div className="flex items-center">
 				<Controller
 					name="remember"
 					control={control}
 					render={({ field }) => (
 						<FormControl>
 							<FormControlLabel
-								label="Remember me"
+								label={t('auth.recordarme')}
 								control={
 									<Checkbox
 										size="small"
@@ -131,25 +128,18 @@ function JwtSignInForm() {
 						</FormControl>
 					)}
 				/>
-
-				<Link
-					className="text-md font-medium"
-					to="/#"
-				>
-					Forgot password?
-				</Link>
 			</div>
 
 			<Button
 				variant="contained"
 				color="secondary"
 				className="mt-4 w-full"
-				aria-label="Sign in"
+				aria-label={t('auth.botonEntrar')}
 				disabled={_.isEmpty(dirtyFields) || !isValid}
 				type="submit"
 				size="large"
 			>
-				Sign in
+				{t('auth.botonEntrar')}
 			</Button>
 		</form>
 	);

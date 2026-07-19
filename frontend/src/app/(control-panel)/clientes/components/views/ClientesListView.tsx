@@ -6,11 +6,15 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
+import Paper from '@mui/material/Paper';
+import Chip from '@mui/material/Chip';
+import IconButton from '@mui/material/IconButton';
 import { DataGrid, type GridColDef, type GridPaginationModel } from '@mui/x-data-grid';
 import { useSnackbar } from 'notistack';
 import { useTranslation } from 'react-i18next';
 import EmptyState from '@/components/EmptyState';
-import { ACCENTS } from '@/configs/designTokens';
+import InitialsAvatar from '@/components/InitialsAvatar';
+import { ACCENTS, DATAGRID_CARD_SX, DATAGRID_SX } from '@/configs/designTokens';
 import useDebounce from '@fuse/hooks/useDebounce';
 import useThemeMediaQuery from '@fuse/hooks/useThemeMediaQuery';
 import { useClientes, useDeleteCliente } from '../../api/hooks/useClientes';
@@ -68,17 +72,49 @@ function ClientesListView() {
 			field: 'nombre_completo',
 			headerName: t('clientes.columnaCliente'),
 			flex: 1.2,
-			valueGetter: (_value, row) => `${row.prenom} ${row.nom}`
+			valueGetter: (_value, row) => `${row.prenom} ${row.nom}`,
+			renderCell: (params) => (
+				<div className="flex h-full items-center gap-2.5">
+					<InitialsAvatar
+						nombre={params.value as string}
+						accent={ACCENTS.clientes}
+						size={32}
+					/>
+					<Typography
+						variant="body2"
+						className="font-medium"
+					>
+						{params.value}
+					</Typography>
+				</div>
+			)
 		},
-		{ field: 'email', headerName: t('clientes.columnaEmail'), flex: 1 },
-		{ field: 'telephone', headerName: t('clientes.columnaTelefono'), flex: 0.8 },
+		{
+			field: 'email',
+			headerName: t('clientes.columnaEmail'),
+			flex: 1,
+			renderCell: (params) => params.value || <span className="text-text-disabled">—</span>
+		},
+		{
+			field: 'telephone',
+			headerName: t('clientes.columnaTelefono'),
+			flex: 0.8,
+			renderCell: (params) => params.value || <span className="text-text-disabled">—</span>
+		},
 		{ field: 'numero_nie', headerName: t('clientes.columnaNie'), flex: 0.7 },
 		{ field: 'nb_dossiers', headerName: t('clientes.columnaExpedientes'), flex: 0.6, type: 'number' },
 		{
 			field: 'actif',
 			headerName: t('clientes.columnaEstado'),
-			flex: 0.6,
-			valueGetter: (value: boolean) => (value ? t('clientes.estadoActivo') : t('clientes.estadoInactivo'))
+			flex: 0.7,
+			renderCell: (params) => (
+				<Chip
+					size="small"
+					label={params.value ? t('clientes.estadoActivo') : t('clientes.estadoInactivo')}
+					color={params.value ? 'success' : 'default'}
+					variant="outlined"
+				/>
+			)
 		},
 		{
 			field: 'acciones',
@@ -86,7 +122,7 @@ function ClientesListView() {
 			flex: 0.5,
 			sortable: false,
 			renderCell: (params) => (
-				<Button
+				<IconButton
 					size="small"
 					color="error"
 					onClick={(e) => {
@@ -94,8 +130,8 @@ function ClientesListView() {
 						eliminar(params.row);
 					}}
 				>
-					{t('comun.eliminar')}
-				</Button>
+					<FuseSvgIcon size={18}>lucide:trash-2</FuseSvgIcon>
+				</IconButton>
 			)
 		}
 	];
@@ -160,25 +196,27 @@ function ClientesListView() {
 								action={{ label: t('clientes.emptyAccion'), onClick: abrirCreacion }}
 							/>
 						) : (
-							<DataGrid
-								rows={clientes}
-								columns={columns}
-								loading={isLoading}
-								paginationMode="server"
-								rowCount={total}
-								paginationModel={paginationModel}
-								onPaginationModelChange={setPaginationModel}
-								pageSizeOptions={[PAGE_SIZE]}
-								disableRowSelectionOnClick
-								onRowClick={(params) => navigate(`/clientes/${params.id}`)}
-								autoHeight
-								columnVisibilityModel={
-									esMobile
-										? { email: false, telephone: false, numero_nie: false, nb_dossiers: false }
-										: undefined
-								}
-								sx={{ cursor: 'pointer' }}
-							/>
+							<Paper sx={DATAGRID_CARD_SX}>
+								<DataGrid
+									rows={clientes}
+									columns={columns}
+									loading={isLoading}
+									paginationMode="server"
+									rowCount={total}
+									paginationModel={paginationModel}
+									onPaginationModelChange={setPaginationModel}
+									pageSizeOptions={[PAGE_SIZE]}
+									disableRowSelectionOnClick
+									onRowClick={(params) => navigate(`/clientes/${params.id}`)}
+									autoHeight
+									columnVisibilityModel={
+										esMobile
+											? { email: false, telephone: false, numero_nie: false, nb_dossiers: false }
+											: undefined
+									}
+									sx={{ ...DATAGRID_SX, cursor: 'pointer' }}
+								/>
+							</Paper>
 						)}
 					</div>
 				}

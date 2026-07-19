@@ -8,6 +8,8 @@ import Paper from '@mui/material/Paper';
 import Chip from '@mui/material/Chip';
 import IconButton from '@mui/material/IconButton';
 import ListSkeleton from '@/components/ListSkeleton';
+import InitialsAvatar from '@/components/InitialsAvatar';
+import { ACCENTS } from '@/configs/designTokens';
 import { useSnackbar } from 'notistack';
 import { useTranslation } from 'react-i18next';
 import { useCliente, useDeleteCliente } from '../../api/hooks/useClientes';
@@ -25,6 +27,20 @@ function Champ({ label, valeur }: { label: string; valeur?: string | null }) {
 				{label}
 			</Typography>
 			<Typography variant="body1">{valeur}</Typography>
+		</div>
+	);
+}
+
+function TituloSeccion({ icono, texto }: { icono: string; texto: string }) {
+	return (
+		<div className="mb-3 flex items-center gap-2">
+			<FuseSvgIcon
+				size={18}
+				style={{ color: ACCENTS.clientes }}
+			>
+				{icono}
+			</FuseSvgIcon>
+			<Typography className="font-semibold">{texto}</Typography>
 		</div>
 	);
 }
@@ -60,6 +76,13 @@ function ClienteDetailView() {
 						<IconButton onClick={() => navigate('/clientes')}>
 							<FuseSvgIcon>lucide:arrow-left</FuseSvgIcon>
 						</IconButton>
+						{cliente && (
+							<InitialsAvatar
+								nombre={`${cliente.prenom} ${cliente.nom}`}
+								accent={ACCENTS.clientes}
+								size={48}
+							/>
+						)}
 						<div className="flex-1">
 							<Typography
 								variant="h4"
@@ -113,9 +136,10 @@ function ClienteDetailView() {
 						{cliente && (
 							<div className="flex flex-col gap-4">
 								<Paper className="rounded-xl p-6">
-									<Typography className="mb-3 font-semibold">
-										{t('clientes.seccionIdentidad')}
-									</Typography>
+									<TituloSeccion
+										icono="lucide:id-card"
+										texto={t('clientes.seccionIdentidad')}
+									/>
 									<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
 										<Champ
 											label={t('clientes.campoFechaNacimiento')}
@@ -140,31 +164,35 @@ function ClienteDetailView() {
 									</div>
 								</Paper>
 
-								<Paper className="rounded-xl p-6">
-									<Typography className="mb-3 font-semibold">
-										{t('clientes.seccionContacto')}
-									</Typography>
-									<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-										<Champ
-											label={t('clientes.campoTelefono')}
-											valeur={cliente.telephone}
+								{(cliente.telephone || cliente.email || cliente.adresse) && (
+									<Paper className="rounded-xl p-6">
+										<TituloSeccion
+											icono="lucide:contact"
+											texto={t('clientes.seccionContacto')}
 										/>
-										<Champ
-											label={t('clientes.campoEmail')}
-											valeur={cliente.email}
-										/>
-										<Champ
-											label={t('clientes.campoDireccion')}
-											valeur={cliente.adresse}
-										/>
-									</div>
-								</Paper>
+										<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+											<Champ
+												label={t('clientes.campoTelefono')}
+												valeur={cliente.telephone}
+											/>
+											<Champ
+												label={t('clientes.campoEmail')}
+												valeur={cliente.email}
+											/>
+											<Champ
+												label={t('clientes.campoDireccion')}
+												valeur={cliente.adresse}
+											/>
+										</div>
+									</Paper>
+								)}
 
 								{cliente.notes && (
 									<Paper className="rounded-xl p-6">
-										<Typography className="mb-3 font-semibold">
-											{t('clientes.detalle.notas')}
-										</Typography>
+										<TituloSeccion
+											icono="lucide:sticky-note"
+											texto={t('clientes.detalle.notas')}
+										/>
 										<Typography
 											variant="body2"
 											className="whitespace-pre-wrap"

@@ -1,6 +1,9 @@
 import Typography from '@mui/material/Typography';
+import { useTranslation } from 'react-i18next';
 
 function SignInPageTitle() {
+	const { t } = useTranslation();
+
 	return (
 		<div className="w-full">
 			<img
@@ -10,10 +13,10 @@ function SignInPageTitle() {
 			/>
 
 			<Typography className="mt-8 text-4xl leading-[1.25] font-extrabold tracking-tight">
-				Iniciar sesión
+				{t('auth.iniciarSesionTitulo')}
 			</Typography>
 			<div className="mt-0.5 flex items-baseline font-medium">
-				<Typography>LexAssist — Gestión documental inteligente</Typography>
+				<Typography>{t('auth.iniciarSesionSubtitulo')}</Typography>
 			</div>
 		</div>
 	);

@@ -1,19 +1,18 @@
 /**
- * Design tokens partagés avec l'app mobile PROF (mobile-prof/src/theme.ts) —
- * même langage visuel entre le desktop et le mobile : accents par module,
- * dégradé signature et ombres douces en couches.
- *
- * Toute évolution ici doit être répercutée dans mobile-prof/src/theme.ts
- * (et inversement) pour que les deux apps ne divergent pas.
+ * Design tokens de LexAssist : accents par module, dégradé signature et
+ * ombres douces en couches, utilisés dans tout le desktop (dashboard, listes,
+ * fiches détail).
  */
 
-// Accent visuel par module — mêmes teintes que l'app mobile pour que
-// l'utilisateur retrouve ses repères d'une app à l'autre.
+// Accent visuel par module — sert à teinter icônes, avatars et badges pour
+// qu'un même module se reconnaisse d'un écran à l'autre.
 export const ACCENTS = {
 	inicio: '#1565C0',
 	clientes: '#22C55E',
 	expedientes: '#3B82F6',
-	documentos: '#4338CA'
+	documentos: '#4338CA',
+	alertas: '#D97706',
+	requerimientos: '#DC2626'
 } as const;
 
 // Dégradé signature (login, FAB, boutons héro) — charbon → indigo.
@@ -35,3 +34,37 @@ export function ombresPourMode(mode: 'light' | 'dark') {
 		? { carte: OMBRE_CARTE_SOMBRE, flottante: OMBRE_FLOTTANTE_SOMBRE }
 		: { carte: OMBRE_CARTE, flottante: OMBRE_FLOTTANTE };
 }
+
+// Style partagé des DataGrid (Clientes/Expedientes/Documentos) : par défaut le composant
+// MUI est complètement plat (pas de bordure interne, pas de fond d'en-tête) et se fond
+// dans l'arrière-plan de la page — d'où l'effet « tableur brut ». On habille l'en-tête et
+// les lignes en s'appuyant sur les variables CSS du thème (compatible clair/sombre sans
+// avoir à passer par useTheme dans chaque vue).
+export const DATAGRID_SX = {
+	border: 'none',
+	'--DataGrid-rowBorderColor': 'var(--mui-palette-divider)',
+	'& .MuiDataGrid-columnHeaders': {
+		backgroundColor: 'var(--mui-palette-action-hover)'
+	},
+	'& .MuiDataGrid-columnHeaderTitle': {
+		fontWeight: 700
+	},
+	'& .MuiDataGrid-row:hover': {
+		backgroundColor: 'var(--mui-palette-action-hover)'
+	},
+	'& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within': {
+		outline: 'none'
+	},
+	'& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-columnHeader:focus-within': {
+		outline: 'none'
+	}
+} as const;
+
+// Carte englobant un DataGrid — donne au tableau une frontière nette et une ombre douce
+// au lieu de flotter directement sur le fond de la page.
+export const DATAGRID_CARD_SX = {
+	borderRadius: 3,
+	border: '1px solid var(--mui-palette-divider)',
+	boxShadow: OMBRE_CARTE,
+	overflow: 'hidden'
+} as const;

@@ -1,6 +1,9 @@
 import Box from '@mui/material/Box';
+import { useTranslation } from 'react-i18next';
 
 function AuthPagesMessageSection() {
+	const { t } = useTranslation();
+
 	return (
 		<Box
 			className="relative hidden h-full flex-auto items-center justify-center overflow-hidden p-16 md:flex lg:px-28"
@@ -72,12 +75,9 @@ function AuthPagesMessageSection() {
 
 			<div className="relative z-10 w-full max-w-4xl">
 				<div className="text-7xl leading-none font-bold text-gray-100">
-					<div>LexAssist</div>
+					<div>{t('auth.tituloPagina')}</div>
 				</div>
-				<div className="mt-6 text-lg leading-6 tracking-tight text-gray-400">
-					Plataforma inteligente de gestión documental para despachos de extranjería. Usted escanea, la IA
-					hace el resto: clasifica los documentos, extrae los datos y rellena los formularios oficiales.
-				</div>
+				<div className="mt-6 text-lg leading-6 tracking-tight text-gray-400">{t('auth.subtituloPagina')}</div>
 			</div>
 		</Box>
 	);

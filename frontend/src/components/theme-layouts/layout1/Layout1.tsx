@@ -5,7 +5,6 @@ import { Outlet } from 'react-router';
 import { motion } from 'motion/react';
 import usePathname from '@fuse/hooks/usePathname';
 import { Layout1ConfigDefaultsType } from 'src/components/theme-layouts/layout1/Layout1Config';
-import Configurator from 'src/components/theme-layouts/components/configurator/Configurator';
 import useFuseLayoutSettings from '@fuse/core/FuseLayout/useFuseLayoutSettings';
 import FuseSuspense from '@fuse/core/FuseSuspense';
 import FooterLayout1 from './components/FooterLayout1';
@@ -70,10 +69,6 @@ function Layout1(props: Layout1Props) {
 					{config.toolbar.display && (
 						<ToolbarLayout1 className={config.toolbar.style === 'fixed' ? 'sticky top-0' : ''} />
 					)}
-
-					<div className="sticky top-0 z-99">
-						<Configurator />
-					</div>
 
 					<div className="relative z-10 flex min-h-0 flex-auto flex-col">
 						{/* Transition de page façon mobile : fondu + légère montée à chaque

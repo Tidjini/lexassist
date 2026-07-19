@@ -4,9 +4,11 @@ import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
 import Chip from '@mui/material/Chip';
 import Skeleton from '@mui/material/Skeleton';
+import { alpha } from '@mui/material/styles';
 import { useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import useUser from '@auth/useUser';
+import { ACCENTS } from '@/configs/designTokens';
 import { useClientes } from '../../../clientes/api/hooks/useClientes';
 import { useExpedientes } from '../../../expedientes/api/hooks/useExpedientes';
 import { useAlertas, useDocumentos } from '../../../documentos/api/hooks/useDocumentos';
@@ -31,6 +33,7 @@ function InicioView() {
 	const tiles = [
 		{
 			icon: 'lucide:users',
+			accent: ACCENTS.clientes,
 			title: t('clientes.tituloPagina'),
 			description: t('inicio.clientesDesc'),
 			url: '/clientes',
@@ -39,6 +42,7 @@ function InicioView() {
 		},
 		{
 			icon: 'lucide:folder-open',
+			accent: ACCENTS.expedientes,
 			title: t('expedientes.tituloPagina'),
 			description: t('inicio.expedientesDesc'),
 			url: '/expedientes',
@@ -47,6 +51,7 @@ function InicioView() {
 		},
 		{
 			icon: 'lucide:file-text',
+			accent: ACCENTS.documentos,
 			title: t('documentos.tituloPagina'),
 			description: t('inicio.documentosDesc'),
 			url: '/documentos',
@@ -55,6 +60,7 @@ function InicioView() {
 		},
 		{
 			icon: 'lucide:bell',
+			accent: ACCENTS.requerimientos,
 			title: t('inicio.requerimientosTitulo'),
 			description: t('inicio.requerimientosDesc'),
 			url: '/expedientes?estado=REQUERIMIENTO',
@@ -63,6 +69,7 @@ function InicioView() {
 		},
 		{
 			icon: 'lucide:calendar-clock',
+			accent: ACCENTS.alertas,
 			title: t('inicio.alertasTitulo'),
 			description: t('inicio.alertasDesc'),
 			url: '/alertas',
@@ -93,14 +100,24 @@ function InicioView() {
 								key={tile.title}
 								className="flex cursor-pointer flex-col gap-3 rounded-xl p-6 transition-shadow hover:shadow-md"
 								onClick={() => navigate(tile.url)}
+								sx={{ borderTop: `3px solid ${tile.accent}` }}
 							>
 								<div className="flex items-center justify-between">
-									<FuseSvgIcon
-										size={28}
-										color="primary"
+									<div
+										className="flex items-center justify-center rounded-2xl"
+										style={{
+											width: 48,
+											height: 48,
+											background: `linear-gradient(135deg, ${alpha(tile.accent, 0.18)}, ${alpha(tile.accent, 0.08)})`
+										}}
 									>
-										{tile.icon}
-									</FuseSvgIcon>
+										<FuseSvgIcon
+											size={24}
+											style={{ color: tile.accent }}
+										>
+											{tile.icon}
+										</FuseSvgIcon>
+									</div>
 									{tile.cargando ? (
 										<Skeleton
 											width={32}

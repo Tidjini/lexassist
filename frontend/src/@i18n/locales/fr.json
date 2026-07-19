@@ -6,6 +6,20 @@
 		"editar": "Modifier",
 		"eliminar": "Supprimer"
 	},
+	"auth": {
+		"tituloPagina": "LexAssist",
+		"subtituloPagina": "Plateforme intelligente de gestion documentaire pour cabinets d'immigration. Vous scannez, l'IA fait le reste : elle classe les documents, extrait les données et remplit les formulaires officiels.",
+		"iniciarSesionTitulo": "Connexion",
+		"iniciarSesionSubtitulo": "LexAssist — Gestion documentaire intelligente",
+		"campoEmail": "Email",
+		"campoPassword": "Mot de passe",
+		"recordarme": "Se souvenir de moi",
+		"botonEntrar": "Se connecter",
+		"errorEmailInvalido": "Saisissez un email valide",
+		"errorEmailRequerido": "Saisissez un email",
+		"errorPasswordCorta": "Le mot de passe doit contenir au moins 4 caractères",
+		"errorPasswordRequerida": "Saisissez votre mot de passe"
+	},
 	"clientes": {
 		"tituloPagina": "Clients",
 		"subtituloPagina": "La « valise de données » de chaque client",

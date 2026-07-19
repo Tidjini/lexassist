@@ -6,6 +6,20 @@
 		"editar": "Editar",
 		"eliminar": "Eliminar"
 	},
+	"auth": {
+		"tituloPagina": "LexAssist",
+		"subtituloPagina": "Plataforma inteligente de gestión documental para despachos de extranjería. Usted escanea, la IA hace el resto: clasifica los documentos, extrae los datos y rellena los formularios oficiales.",
+		"iniciarSesionTitulo": "Iniciar sesión",
+		"iniciarSesionSubtitulo": "LexAssist — Gestión documental inteligente",
+		"campoEmail": "Email",
+		"campoPassword": "Contraseña",
+		"recordarme": "Recordarme",
+		"botonEntrar": "Iniciar sesión",
+		"errorEmailInvalido": "Introduzca un email válido",
+		"errorEmailRequerido": "Introduzca un email",
+		"errorPasswordCorta": "La contraseña debe tener al menos 4 caracteres",
+		"errorPasswordRequerida": "Introduzca su contraseña"
+	},
 	"clientes": {
 		"tituloPagina": "Clientes",
 		"subtituloPagina": "La «maleta de datos» de cada cliente",

@@ -8,11 +8,13 @@ import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
 import IconButton from '@mui/material/IconButton';
 import Chip from '@mui/material/Chip';
+import Paper from '@mui/material/Paper';
 import { DataGrid, type GridColDef, type GridPaginationModel } from '@mui/x-data-grid';
 import { useSnackbar } from 'notistack';
 import { useTranslation } from 'react-i18next';
 import EmptyState from '@/components/EmptyState';
-import { ACCENTS } from '@/configs/designTokens';
+import InitialsAvatar from '@/components/InitialsAvatar';
+import { ACCENTS, DATAGRID_CARD_SX, DATAGRID_SX } from '@/configs/designTokens';
 import useThemeMediaQuery from '@fuse/hooks/useThemeMediaQuery';
 import { useCliente } from '../../../clientes/api/hooks/useClientes';
 import { useDeleteDocumento, useDocumentos } from '../../api/hooks/useDocumentos';
@@ -85,13 +87,45 @@ function DocumentosListView() {
 	}
 
 	const columns: GridColDef<Documento>[] = [
-		{ field: 'nom_original', headerName: t('documentos.columnaArchivo'), flex: 1.2 },
+		{
+			field: 'nom_original',
+			headerName: t('documentos.columnaArchivo'),
+			flex: 1.2,
+			renderCell: (params) => (
+				<div className="flex h-full items-center gap-2.5">
+					<div
+						className="flex items-center justify-center rounded-lg"
+						style={{ width: 32, height: 32, backgroundColor: `${ACCENTS.documentos}29` }}
+					>
+						<FuseSvgIcon
+							size={16}
+							style={{ color: ACCENTS.documentos }}
+						>
+							lucide:file-text
+						</FuseSvgIcon>
+					</div>
+					<Typography
+						variant="body2"
+						className="font-medium"
+					>
+						{params.value}
+					</Typography>
+				</div>
+			)
+		},
 		{
 			field: 'cliente_nom_complet',
 			headerName: t('clientes.columnaCliente'),
 			flex: 1,
 			renderCell: (params) => (
-				<div className="flex items-center gap-1.5">
+				<div className="flex h-full items-center gap-1.5">
+					{params.row.cliente !== null && (
+						<InitialsAvatar
+							nombre={params.value as string}
+							accent={ACCENTS.clientes}
+							size={28}
+						/>
+					)}
 					<Typography variant="body2">
 						{params.row.cliente === null ? t('documentos.sinAsignar') : params.value}
 					</Typography>
@@ -227,21 +261,23 @@ function DocumentosListView() {
 								action={{ label: t('documentos.emptyAccion'), onClick: () => setDialogOpen(true) }}
 							/>
 						) : (
-							<DataGrid
-								rows={documentos}
-								columns={columns}
-								loading={isLoading}
-								paginationMode="server"
-								rowCount={total}
-								paginationModel={paginationModel}
-								onPaginationModelChange={setPaginationModel}
-								pageSizeOptions={[PAGE_SIZE]}
-								disableRowSelectionOnClick
-								onRowClick={(params) => setPreviewDocumento(params.row)}
-								autoHeight
-								columnVisibilityModel={esMobile ? { taille: false, created_at: false } : undefined}
-								sx={{ cursor: 'pointer' }}
-							/>
+							<Paper sx={DATAGRID_CARD_SX}>
+								<DataGrid
+									rows={documentos}
+									columns={columns}
+									loading={isLoading}
+									paginationMode="server"
+									rowCount={total}
+									paginationModel={paginationModel}
+									onPaginationModelChange={setPaginationModel}
+									pageSizeOptions={[PAGE_SIZE]}
+									disableRowSelectionOnClick
+									onRowClick={(params) => setPreviewDocumento(params.row)}
+									autoHeight
+									columnVisibilityModel={esMobile ? { taille: false, created_at: false } : undefined}
+									sx={{ ...DATAGRID_SX, cursor: 'pointer' }}
+								/>
+							</Paper>
 						)}
 					</div>
 				}

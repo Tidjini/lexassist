@@ -8,10 +8,12 @@ import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
 import InputAdornment from '@mui/material/InputAdornment';
 import Chip from '@mui/material/Chip';
+import Paper from '@mui/material/Paper';
 import { DataGrid, type GridColDef, type GridPaginationModel } from '@mui/x-data-grid';
 import { useTranslation } from 'react-i18next';
 import EmptyState from '@/components/EmptyState';
-import { ACCENTS } from '@/configs/designTokens';
+import InitialsAvatar from '@/components/InitialsAvatar';
+import { ACCENTS, DATAGRID_CARD_SX, DATAGRID_SX } from '@/configs/designTokens';
 import useDebounce from '@fuse/hooks/useDebounce';
 import { useCliente } from '../../../clientes/api/hooks/useClientes';
 import { useExpedientes } from '../../api/hooks/useExpedientes';
@@ -61,9 +63,53 @@ function ExpedientesListView() {
 	const sinExpedientes = !isLoading && total === 0 && !recherche && !estado;
 
 	const columns: GridColDef<Expediente>[] = [
-		{ field: 'titre', headerName: t('expedientes.columnaExpediente'), flex: 1.2 },
-		{ field: 'cliente_nom_complet', headerName: t('expedientes.columnaCliente'), flex: 1 },
-		{ field: 'type_procedure', headerName: t('expedientes.columnaTramite'), flex: 0.8 },
+		{
+			field: 'titre',
+			headerName: t('expedientes.columnaExpediente'),
+			flex: 1.2,
+			renderCell: (params) => (
+				<div className="flex h-full items-center gap-2.5">
+					<div
+						className="flex items-center justify-center rounded-lg"
+						style={{ width: 32, height: 32, backgroundColor: `${ACCENTS.expedientes}29` }}
+					>
+						<FuseSvgIcon
+							size={16}
+							style={{ color: ACCENTS.expedientes }}
+						>
+							lucide:folder-open
+						</FuseSvgIcon>
+					</div>
+					<Typography
+						variant="body2"
+						className="font-medium"
+					>
+						{params.value}
+					</Typography>
+				</div>
+			)
+		},
+		{
+			field: 'cliente_nom_complet',
+			headerName: t('expedientes.columnaCliente'),
+			flex: 1,
+			renderCell: (params) => (
+				<div className="flex h-full items-center gap-2">
+					<InitialsAvatar
+						nombre={params.value as string}
+						accent={ACCENTS.clientes}
+						size={28}
+					/>
+					<Typography variant="body2">{params.value}</Typography>
+				</div>
+			)
+		},
+		{
+			field: 'type_procedure',
+			headerName: t('expedientes.columnaTramite'),
+			flex: 0.8,
+			renderCell: (params) => params.value || <span className="text-text-disabled">—</span>
+		},
 		{
 			field: 'statut',
 			headerName: t('expedientes.columnaEstado'),
@@ -167,20 +213,22 @@ function ExpedientesListView() {
 								action={{ label: t('expedientes.emptyAccion'), onClick: () => setDialogOpen(true) }}
 							/>
 						) : (
-							<DataGrid
-								rows={expedientes}
-								columns={columns}
-								loading={isLoading}
-								paginationMode="server"
-								rowCount={total}
-								paginationModel={paginationModel}
-								onPaginationModelChange={setPaginationModel}
-								pageSizeOptions={[PAGE_SIZE]}
-								disableRowSelectionOnClick
-								onRowClick={(params) => navigate(`/expedientes/${params.id}`)}
-								autoHeight
-								sx={{ cursor: 'pointer' }}
-							/>
+							<Paper sx={DATAGRID_CARD_SX}>
+								<DataGrid
+									rows={expedientes}
+									columns={columns}
+									loading={isLoading}
+									paginationMode="server"
+									rowCount={total}
+									paginationModel={paginationModel}
+									onPaginationModelChange={setPaginationModel}
+									pageSizeOptions={[PAGE_SIZE]}
+									disableRowSelectionOnClick
+									onRowClick={(params) => navigate(`/expedientes/${params.id}`)}
+									autoHeight
+									sx={{ ...DATAGRID_SX, cursor: 'pointer' }}
+								/>
+							</Paper>
 						)}
 					</div>
 				}
