@@ -14,6 +14,7 @@ import { useSnackbar } from 'notistack';
 import { useTranslation } from 'react-i18next';
 import EmptyState from '@/components/EmptyState';
 import InitialsAvatar from '@/components/InitialsAvatar';
+import IconBadge from '@/components/IconBadge';
 import { ACCENTS, DATAGRID_CARD_SX, DATAGRID_SX } from '@/configs/designTokens';
 import useThemeMediaQuery from '@fuse/hooks/useThemeMediaQuery';
 import { useCliente } from '../../../clientes/api/hooks/useClientes';
@@ -111,17 +112,10 @@ function DocumentosListView() {
 			flex: 1.2,
 			renderCell: (params) => (
 				<div className="flex h-full items-center gap-2.5">
-					<div
-						className="flex items-center justify-center rounded-lg"
-						style={{ width: 32, height: 32, backgroundColor: `${ACCENTS.documentos}29` }}
-					>
-						<FuseSvgIcon
-							size={16}
-							style={{ color: ACCENTS.documentos }}
-						>
-							lucide:file-text
-						</FuseSvgIcon>
-					</div>
+					<IconBadge
+						icono="lucide:file-text"
+						accent={ACCENTS.documentos}
+					/>
 					<Typography
 						variant="body2"
 						className="font-medium"

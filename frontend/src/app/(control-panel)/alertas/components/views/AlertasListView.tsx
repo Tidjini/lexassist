@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router';
 import FusePageSimple from '@fuse/core/FusePageSimple';
-import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
 import Paper from '@mui/material/Paper';
@@ -8,6 +7,7 @@ import { DataGrid, type GridColDef } from '@mui/x-data-grid';
 import { useTranslation } from 'react-i18next';
 import EmptyState from '@/components/EmptyState';
 import InitialsAvatar from '@/components/InitialsAvatar';
+import IconBadge from '@/components/IconBadge';
 import { ACCENTS, DATAGRID_CARD_SX, DATAGRID_SX } from '@/configs/designTokens';
 import ListSkeleton from '@/components/ListSkeleton';
 import { useAlertas } from '../../../documentos/api/hooks/useDocumentos';
@@ -42,17 +42,10 @@ function AlertasListView() {
 			flex: 1.2,
 			renderCell: (params) => (
 				<div className="flex h-full items-center gap-2.5">
-					<div
-						className="flex items-center justify-center rounded-lg"
-						style={{ width: 32, height: 32, backgroundColor: `${ACCENTS.alertas}29` }}
-					>
-						<FuseSvgIcon
-							size={16}
-							style={{ color: ACCENTS.alertas }}
-						>
-							lucide:calendar-clock
-						</FuseSvgIcon>
-					</div>
+					<IconBadge
+						icono="lucide:calendar-clock"
+						accent={ACCENTS.alertas}
+					/>
 					<Typography
 						variant="body2"
 						className="font-medium"
