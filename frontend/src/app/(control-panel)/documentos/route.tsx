@@ -1,11 +1,11 @@
 import { lazy } from 'react';
 import { FuseRouteItemType } from '@fuse/utils/FuseUtils';
 
-const DocumentosView = lazy(() => import('./DocumentosView'));
+const DocumentosListView = lazy(() => import('./components/views/DocumentosListView'));
 
 const route: FuseRouteItemType = {
 	path: 'documentos',
-	element: <DocumentosView />
+	element: <DocumentosListView />
 };
 
 export default route;
