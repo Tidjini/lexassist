@@ -5,6 +5,7 @@ import {
 	confirmarCliente,
 	deleteDocumento,
 	fetchAlertas,
+	fetchDocumento,
 	fetchDocumentos,
 	fetchSinClasificar,
 	subirDocumento,
@@ -17,6 +18,15 @@ export function useDocumentos(filtros: DocumentoFiltros) {
 		queryKey: ['documentos', filtros],
 		queryFn: () => fetchDocumentos(filtros),
 		placeholderData: keepPreviousData
+	});
+}
+
+export function useDocumento(id: number | string | undefined) {
+	const idNormalise = id !== undefined ? Number(id) : undefined;
+	return useQuery({
+		queryKey: ['documento', idNormalise],
+		queryFn: () => fetchDocumento(id!),
+		enabled: !!id
 	});
 }
 

@@ -23,3 +23,7 @@ export async function fetchNotificaciones(): Promise<PaginatedResponse<Notificac
 export async function marcarLeida(id: number): Promise<Notificacion> {
 	return api.post(`notificaciones/${id}/marcar_leida/`).json<Notificacion>();
 }
+
+export async function eliminarNotificacion(id: number): Promise<void> {
+	await api.delete(`notificaciones/${id}/`);
+}

@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { fetchNotificaciones, marcarLeida } from './notificacionesApi';
+import { eliminarNotificacion, fetchNotificaciones, marcarLeida } from './notificacionesApi';
 
 // Polling (pas de client WebSocket pour cette passe — le consumer Channels côté serveur
 // existe déjà pour plus tard, voir apps.notifications.consumers).
@@ -17,6 +17,14 @@ export function useMarcarLeida() {
 	const queryClient = useQueryClient();
 	return useMutation({
 		mutationFn: (id: number) => marcarLeida(id),
+		onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notificaciones'] })
+	});
+}
+
+export function useEliminarNotificacion() {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: (id: number) => eliminarNotificacion(id),
 		onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notificaciones'] })
 	});
 }

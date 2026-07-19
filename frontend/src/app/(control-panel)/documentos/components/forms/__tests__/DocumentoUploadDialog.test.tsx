@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '@/test/utils';
@@ -16,6 +16,11 @@ vi.mock('@/utils/api', () => ({
 }));
 
 describe('DocumentoUploadDialog', () => {
+	beforeEach(() => {
+		apiMock.post.mockClear();
+		apiMock.get.mockClear();
+	});
+
 	it('rechaza el envío si no se ha seleccionado ningún archivo', async () => {
 		const user = userEvent.setup();
 		renderWithProviders(
@@ -28,7 +33,7 @@ describe('DocumentoUploadDialog', () => {
 
 		await user.click(screen.getByRole('button', { name: 'Subir' }));
 
-		expect(await screen.findByText('Seleccione un archivo')).toBeInTheDocument();
+		expect(await screen.findByText('Seleccione al menos un archivo')).toBeInTheDocument();
 		expect(apiMock.post).not.toHaveBeenCalled();
 	});
 
@@ -89,5 +94,35 @@ describe('DocumentoUploadDialog', () => {
 				expect.objectContaining({ body: expect.any(FormData) })
 			)
 		);
+	});
+
+	it('permite seleccionar varios archivos a la vez y los sube todos', async () => {
+		apiMock.post.mockReturnValue({
+			json: () => Promise.resolve({ id: 1, nom_original: 'doc.pdf' })
+		});
+		const user = userEvent.setup();
+		const onClose = vi.fn();
+		renderWithProviders(
+			<DocumentoUploadDialog
+				open
+				clienteFijo={{ id: 1, label: 'Maria Garcia' }}
+				onClose={onClose}
+			/>
+		);
+
+		const ficheros = [
+			new File(['a'], 'a.pdf', { type: 'application/pdf' }),
+			new File(['b'], 'b.pdf', { type: 'application/pdf' })
+		];
+		const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+		await user.upload(input, ficheros);
+
+		expect(screen.getByText('a.pdf')).toBeInTheDocument();
+		expect(screen.getByText('b.pdf')).toBeInTheDocument();
+
+		await user.click(screen.getByRole('button', { name: 'Subir 2 documentos' }));
+
+		await waitFor(() => expect(apiMock.post).toHaveBeenCalledTimes(2));
+		await waitFor(() => expect(onClose).toHaveBeenCalled());
 	});
 });

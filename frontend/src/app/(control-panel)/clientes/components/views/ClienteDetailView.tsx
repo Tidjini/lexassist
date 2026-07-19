@@ -7,6 +7,8 @@ import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
 import Chip from '@mui/material/Chip';
 import IconButton from '@mui/material/IconButton';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
 import ListSkeleton from '@/components/ListSkeleton';
 import InitialsAvatar from '@/components/InitialsAvatar';
 import { ACCENTS } from '@/configs/designTokens';
@@ -14,6 +16,8 @@ import { useSnackbar } from 'notistack';
 import { useTranslation } from 'react-i18next';
 import { useCliente, useDeleteCliente } from '../../api/hooks/useClientes';
 import ClienteFormDialog from '../forms/ClienteFormDialog';
+import ClienteExpedientesTab from './ClienteExpedientesTab';
+import ClienteDocumentosTab from './ClienteDocumentosTab';
 
 function Champ({ label, valeur }: { label: string; valeur?: string | null }) {
 	if (!valeur) return null;
@@ -51,6 +55,7 @@ function ClienteDetailView() {
 	const { t } = useTranslation();
 	const { enqueueSnackbar } = useSnackbar();
 	const [dialogOpen, setDialogOpen] = useState(false);
+	const [tab, setTab] = useState<'datos' | 'expedientes' | 'documentos'>('datos');
 	const { data: cliente, isLoading } = useCliente(clienteId);
 	const deleteMutation = useDeleteCliente();
 
@@ -100,20 +105,6 @@ function ClienteDetailView() {
 						</div>
 						<Button
 							variant="outlined"
-							startIcon={<FuseSvgIcon size={18}>lucide:folder-open</FuseSvgIcon>}
-							onClick={() => navigate(`/expedientes?cliente=${clienteId}`)}
-						>
-							{t('clientes.detalle.expedientes', { count: cliente?.nb_dossiers ?? 0 })}
-						</Button>
-						<Button
-							variant="outlined"
-							startIcon={<FuseSvgIcon size={18}>lucide:file-text</FuseSvgIcon>}
-							onClick={() => navigate(`/documentos?cliente=${clienteId}`)}
-						>
-							{t('clientes.detalle.documentos')}
-						</Button>
-						<Button
-							variant="outlined"
 							startIcon={<FuseSvgIcon size={18}>lucide:pencil</FuseSvgIcon>}
 							onClick={() => setDialogOpen(true)}
 						>
@@ -135,80 +126,119 @@ function ClienteDetailView() {
 
 						{cliente && (
 							<div className="flex flex-col gap-4">
-								<Paper className="rounded-xl p-6">
-									<TituloSeccion
-										icono="lucide:id-card"
-										texto={t('clientes.seccionIdentidad')}
+								<Tabs
+									value={tab}
+									onChange={(_e, valeur) => setTab(valeur)}
+									className="mb-2"
+								>
+									<Tab
+										value="datos"
+										label={t('clientes.detalle.tabDatos')}
 									/>
-									<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-										<Champ
-											label={t('clientes.campoFechaNacimiento')}
-											valeur={cliente.date_naissance}
-										/>
-										<Champ
-											label={t('clientes.campoNacionalidad')}
-											valeur={cliente.nationalite}
-										/>
-										<Champ
-											label={t('clientes.campoNie')}
-											valeur={cliente.numero_nie}
-										/>
-										<Champ
-											label={t('clientes.campoPasaporte')}
-											valeur={cliente.numero_passeport}
-										/>
-										<Champ
-											label={t('clientes.campoDni')}
-											valeur={cliente.numero_dni}
-										/>
+									<Tab
+										value="expedientes"
+										label={t('clientes.detalle.expedientes', { count: cliente.nb_dossiers })}
+									/>
+									<Tab
+										value="documentos"
+										label={t('clientes.detalle.documentos')}
+									/>
+								</Tabs>
+
+								{tab === 'datos' && (
+									<div className="flex flex-col gap-4">
+										<Paper className="rounded-xl p-6">
+											<TituloSeccion
+												icono="lucide:id-card"
+												texto={t('clientes.seccionIdentidad')}
+											/>
+											<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+												<Champ
+													label={t('clientes.campoFechaNacimiento')}
+													valeur={cliente.date_naissance}
+												/>
+												<Champ
+													label={t('clientes.campoNacionalidad')}
+													valeur={cliente.nationalite}
+												/>
+												<Champ
+													label={t('clientes.campoNie')}
+													valeur={cliente.numero_nie}
+												/>
+												<Champ
+													label={t('clientes.campoPasaporte')}
+													valeur={cliente.numero_passeport}
+												/>
+												<Champ
+													label={t('clientes.campoDni')}
+													valeur={cliente.numero_dni}
+												/>
+											</div>
+										</Paper>
+
+										{(cliente.telephone || cliente.email || cliente.adresse) && (
+											<Paper className="rounded-xl p-6">
+												<TituloSeccion
+													icono="lucide:contact"
+													texto={t('clientes.seccionContacto')}
+												/>
+												<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+													<Champ
+														label={t('clientes.campoTelefono')}
+														valeur={cliente.telephone}
+													/>
+													<Champ
+														label={t('clientes.campoEmail')}
+														valeur={cliente.email}
+													/>
+													<Champ
+														label={t('clientes.campoDireccion')}
+														valeur={cliente.adresse}
+													/>
+												</div>
+											</Paper>
+										)}
+
+										{cliente.notes && (
+											<Paper className="rounded-xl p-6">
+												<TituloSeccion
+													icono="lucide:sticky-note"
+													texto={t('clientes.detalle.notas')}
+												/>
+												<Typography
+													variant="body2"
+													className="whitespace-pre-wrap"
+												>
+													{cliente.notes}
+												</Typography>
+											</Paper>
+										)}
+
+										{cliente.cree_par && (
+											<Typography
+												variant="caption"
+												color="text.secondary"
+											>
+												{t('clientes.detalle.creadoPor', {
+													nombre: cliente.cree_par.displayName
+												})}
+											</Typography>
+										)}
 									</div>
-								</Paper>
-
-								{(cliente.telephone || cliente.email || cliente.adresse) && (
-									<Paper className="rounded-xl p-6">
-										<TituloSeccion
-											icono="lucide:contact"
-											texto={t('clientes.seccionContacto')}
-										/>
-										<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-											<Champ
-												label={t('clientes.campoTelefono')}
-												valeur={cliente.telephone}
-											/>
-											<Champ
-												label={t('clientes.campoEmail')}
-												valeur={cliente.email}
-											/>
-											<Champ
-												label={t('clientes.campoDireccion')}
-												valeur={cliente.adresse}
-											/>
-										</div>
-									</Paper>
 								)}
 
-								{cliente.notes && (
-									<Paper className="rounded-xl p-6">
-										<TituloSeccion
-											icono="lucide:sticky-note"
-											texto={t('clientes.detalle.notas')}
-										/>
-										<Typography
-											variant="body2"
-											className="whitespace-pre-wrap"
-										>
-											{cliente.notes}
-										</Typography>
-									</Paper>
+								{tab === 'expedientes' && (
+									<ClienteExpedientesTab
+										clienteId={cliente.id}
+										clienteLabel={`${cliente.prenom} ${cliente.nom}`}
+									/>
 								)}
 
-								{cliente.cree_par && (
-									<Typography
-										variant="caption"
-										color="text.secondary"
-									>
-										{t('clientes.detalle.creadoPor', { nombre: cliente.cree_par.displayName })}
-									</Typography>
+								{tab === 'documentos' && (
+									<ClienteDocumentosTab
+										clienteId={cliente.id}
+										clienteLabel={`${cliente.prenom} ${cliente.nom}`}
+									/>
 								)}
 							</div>
 						)}

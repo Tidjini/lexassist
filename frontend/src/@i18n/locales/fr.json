@@ -61,6 +61,7 @@
 		"creado": "Client créé",
 		"modificado": "Client modifié",
 		"detalle": {
+			"tabDatos": "Données",
 			"expedientes": "Dossiers ({{count}})",
 			"documentos": "Documents",
 			"notas": "Notes",
@@ -173,11 +174,14 @@
 			"campoCliente": "Client",
 			"clienteOpcional": "Laissez vide pour que l'IA détermine le client automatiquement.",
 			"campoCategoria": "Catégorie",
-			"seleccionarArchivo": "Choisir un fichier (image ou PDF)",
-			"formatosAceptados": "Formats acceptés : JPG, PNG, WEBP, PDF.",
+			"seleccionarArchivo": "Choisir des fichiers (image ou PDF)",
+			"formatosAceptados": "Formats acceptés : JPG, PNG, WEBP, PDF. Sélection multiple possible.",
 			"botonSubir": "Téléverser",
-			"errorFaltan": "Sélectionnez un fichier",
-			"subido": "Document téléversé"
+			"botonSubirVarios": "Téléverser {{cantidad}} documents",
+			"errorFaltan": "Sélectionnez au moins un fichier",
+			"subido": "Document téléversé",
+			"subidoPlural": "{{cantidad}} documents téléversés",
+			"erroresParciales": "{{cantidad}} document(s) n'ont pas pu être téléversés"
 		},
 		"preview": {
 			"abrirPestana": "Ouvrir dans un nouvel onglet",
@@ -235,6 +239,7 @@
 	},
 	"notificaciones": {
 		"titulo": "Notifications",
-		"vacio": "Aucune notification"
+		"vacio": "Aucune notification",
+		"eliminar": "Supprimer la notification"
 	}
 }

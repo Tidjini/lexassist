@@ -12,8 +12,14 @@ export function useClientes(filtros: ClienteFiltros, options?: { enabled?: boole
 }
 
 export function useCliente(id: number | string | undefined) {
+	// Normalise en Number : useParams() renvoie une string ('5'), mais les mutations
+	// invalident avec l'id numérique de la réponse API (data.id). Sans cette normalisation
+	// les clés ['cliente', '5'] et ['cliente', 5] ne matchent jamais et invalidateQueries
+	// rate silencieusement la query active — la page reste périmée tant qu'on ne la
+	// recharge pas à la main.
+	const idNormalise = id !== undefined ? Number(id) : undefined;
 	return useQuery({
-		queryKey: ['cliente', id],
+		queryKey: ['cliente', idNormalise],
 		queryFn: () => fetchCliente(id!),
 		enabled: !!id
 	});

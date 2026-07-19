@@ -61,6 +61,7 @@
 		"creado": "Cliente creado",
 		"modificado": "Cliente modificado",
 		"detalle": {
+			"tabDatos": "Datos",
 			"expedientes": "Expedientes ({{count}})",
 			"documentos": "Documentos",
 			"notas": "Notas",
@@ -173,11 +174,14 @@
 			"campoCliente": "Cliente",
 			"clienteOpcional": "Déjelo vacío para que la IA determine el cliente automáticamente.",
 			"campoCategoria": "Categoría",
-			"seleccionarArchivo": "Seleccionar archivo (imagen o PDF)",
-			"formatosAceptados": "Formatos aceptados: JPG, PNG, WEBP, PDF.",
+			"seleccionarArchivo": "Seleccionar archivos (imagen o PDF)",
+			"formatosAceptados": "Formatos aceptados: JPG, PNG, WEBP, PDF. Puede seleccionar varios a la vez.",
 			"botonSubir": "Subir",
-			"errorFaltan": "Seleccione un archivo",
-			"subido": "Documento subido"
+			"botonSubirVarios": "Subir {{cantidad}} documentos",
+			"errorFaltan": "Seleccione al menos un archivo",
+			"subido": "Documento subido",
+			"subidoPlural": "{{cantidad}} documentos subidos",
+			"erroresParciales": "{{cantidad}} documento(s) no se pudieron subir"
 		},
 		"preview": {
 			"abrirPestana": "Abrir en una pestaña",
@@ -235,6 +239,7 @@
 	},
 	"notificaciones": {
 		"titulo": "Notificaciones",
-		"vacio": "No hay notificaciones"
+		"vacio": "No hay notificaciones",
+		"eliminar": "Eliminar notificación"
 	}
 }

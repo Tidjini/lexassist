@@ -39,6 +39,10 @@ export async function subirDocumento(payload: SubirDocumentoPayload): Promise<Do
 	return api.post('documentos/', { body: datos }).json<Documento>();
 }
 
+export async function fetchDocumento(id: number | string): Promise<Documento> {
+	return api.get(`documentos/${id}/`).json<Documento>();
+}
+
 export async function deleteDocumento(id: number): Promise<void> {
 	await api.delete(`documentos/${id}/`);
 }

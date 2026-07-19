@@ -18,18 +18,33 @@ export function useExpedientes(filtros: ExpedienteFiltros) {
 }
 
 export function useExpediente(id: number | string | undefined) {
+	// Voir useCliente() dans clientes/api/hooks : même normalisation, même raison (id de
+	// route en string vs id numérique renvoyé par l'API, sinon invalidateQueries rate la
+	// query active après une mutation et la page reste périmée jusqu'au rechargement).
+	const idNormalise = id !== undefined ? Number(id) : undefined;
 	return useQuery({
-		queryKey: ['expediente', id],
+		queryKey: ['expediente', idNormalise],
 		queryFn: () => fetchExpediente(id!),
 		enabled: !!id
 	});
+}
+
+// Le compteur « Expedientes (n) » de la fiche client (Cliente.nb_dossiers) dépend du
+// nombre de dossiers du client — toute création/màj/suppression de dossier doit donc
+// aussi invalider le cache clients, sans quoi le compteur reste périmé jusqu'au
+// rechargement de la page (invalidation large par préfixe : pas besoin de connaître
+// l'id exact du client concerné).
+function invaliderClientsEtExpedientes(queryClient: ReturnType<typeof useQueryClient>) {
+	queryClient.invalidateQueries({ queryKey: ['expedientes'] });
+	queryClient.invalidateQueries({ queryKey: ['clientes'] });
+	queryClient.invalidateQueries({ queryKey: ['cliente'] });
 }
 
 export function useCreateExpediente() {
 	const queryClient = useQueryClient();
 	return useMutation({
 		mutationFn: (payload: ExpedientePayload) => createExpediente(payload),
-		onSuccess: () => queryClient.invalidateQueries({ queryKey: ['expedientes'] })
+		onSuccess: () => invaliderClientsEtExpedientes(queryClient)
 	});
 }
 
@@ -39,7 +54,7 @@ export function useUpdateExpediente() {
 		mutationFn: ({ id, payload }: { id: number; payload: Partial<ExpedientePayload> }) =>
 			updateExpediente(id, payload),
 		onSuccess: (data) => {
-			queryClient.invalidateQueries({ queryKey: ['expedientes'] });
+			invaliderClientsEtExpedientes(queryClient);
 			queryClient.invalidateQueries({ queryKey: ['expediente', data.id] });
 		}
 	});
@@ -49,7 +64,7 @@ export function useDeleteExpediente() {
 	const queryClient = useQueryClient();
 	return useMutation({
 		mutationFn: (id: number) => deleteExpediente(id),
-		onSuccess: () => queryClient.invalidateQueries({ queryKey: ['expedientes'] })
+		onSuccess: () => invaliderClientsEtExpedientes(queryClient)
 	});
 }
 
@@ -59,7 +74,7 @@ export function useCambiarEstado() {
 		mutationFn: ({ id, statut, commentaire }: { id: number; statut: EstadoExpediente; commentaire?: string }) =>
 			cambiarEstado(id, statut, commentaire),
 		onSuccess: (data) => {
-			queryClient.invalidateQueries({ queryKey: ['expedientes'] });
+			invaliderClientsEtExpedientes(queryClient);
 			queryClient.invalidateQueries({ queryKey: ['expediente', data.id] });
 		}
 	});

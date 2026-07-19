@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import FusePageSimple from '@fuse/core/FusePageSimple';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
@@ -17,7 +17,7 @@ import InitialsAvatar from '@/components/InitialsAvatar';
 import { ACCENTS, DATAGRID_CARD_SX, DATAGRID_SX } from '@/configs/designTokens';
 import useThemeMediaQuery from '@fuse/hooks/useThemeMediaQuery';
 import { useCliente } from '../../../clientes/api/hooks/useClientes';
-import { useDeleteDocumento, useDocumentos } from '../../api/hooks/useDocumentos';
+import { useDeleteDocumento, useDocumento, useDocumentos } from '../../api/hooks/useDocumentos';
 import {
 	CATEGORIAS,
 	categoriaLabelKey,
@@ -43,9 +43,10 @@ function DocumentosListView() {
 	const { t, i18n } = useTranslation();
 	const navigate = useNavigate();
 	const { enqueueSnackbar } = useSnackbar();
-	const [searchParams] = useSearchParams();
+	const [searchParams, setSearchParams] = useSearchParams();
 	const clienteFiltro = searchParams.get('cliente');
 	const dossierFiltro = searchParams.get('dossier');
+	const highlightId = searchParams.get('highlight');
 	const [categoria, setCategoria] = useState<CategoriaDocumento | ''>('');
 	const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
 		page: 0,
@@ -62,6 +63,23 @@ function DocumentosListView() {
 		clienteFiltro && clienteDelFiltro
 			? { id: clienteDelFiltro.id, label: `${clienteDelFiltro.prenom} ${clienteDelFiltro.nom}` }
 			: null;
+
+	// Arrivé depuis une notification (clic sur "documento X traité") : ouvre directement
+	// son aperçu au lieu de laisser l'utilisateur le rechercher dans la liste.
+	const { data: documentoAMettreEnValeur } = useDocumento(highlightId ?? undefined);
+	useEffect(() => {
+		if (!documentoAMettreEnValeur) return;
+
+		setPreviewDocumento(documentoAMettreEnValeur);
+		setSearchParams(
+			(prev) => {
+				const suivant = new URLSearchParams(prev);
+				suivant.delete('highlight');
+				return suivant;
+			},
+			{ replace: true }
+		);
+	}, [documentoAMettreEnValeur, setSearchParams]);
 
 	const { data, isLoading } = useDocumentos({
 		cliente: clienteFiltro ? Number(clienteFiltro) : undefined,

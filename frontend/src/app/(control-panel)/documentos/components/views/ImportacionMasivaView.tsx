@@ -11,6 +11,7 @@ import LinearProgress from '@mui/material/LinearProgress';
 import { useTranslation } from 'react-i18next';
 import { useSubirDocumento } from '../../api/hooks/useDocumentos';
 import type { Documento } from '../../api/types';
+import { ejecutarConConcurrencia } from '@/utils/concurrencia';
 import DocumentoPreviewDialog from './DocumentoPreviewDialog';
 
 const CONCURRENCIA = 3;
@@ -27,20 +28,6 @@ type ItemImportacion = {
 
 function nuevoId() {
 	return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-}
-
-async function ejecutarConConcurrencia<T>(items: T[], limite: number, tarea: (item: T) => Promise<void>) {
-	let indice = 0;
-
-	async function trabajador() {
-		while (indice < items.length) {
-			const miIndice = indice;
-			indice += 1;
-			await tarea(items[miIndice]);
-		}
-	}
-
-	await Promise.all(Array.from({ length: Math.min(limite, items.length) }, trabajador));
 }
 
 function ImportacionMasivaView() {

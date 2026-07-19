@@ -7,7 +7,9 @@ from .models import Notification
 from .serializers import NotificationSerializer
 
 
-class NotificationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+class NotificationViewSet(
+    mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet
+):
     serializer_class = NotificationSerializer
     permission_classes = [IsAuthenticated]
 

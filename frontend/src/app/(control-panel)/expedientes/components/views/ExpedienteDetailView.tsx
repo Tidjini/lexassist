@@ -9,6 +9,8 @@ import Chip from '@mui/material/Chip';
 import IconButton from '@mui/material/IconButton';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
 import ListSkeleton from '@/components/ListSkeleton';
 import InitialsAvatar from '@/components/InitialsAvatar';
 import { ACCENTS } from '@/configs/designTokens';
@@ -18,6 +20,7 @@ import { useCambiarEstado, useDeleteExpediente, useExpediente } from '../../api/
 import { ESTADOS, estadoInfo, type EstadoExpediente } from '../../api/types';
 import { extractErrorMessage } from '@/utils/apiError';
 import ExpedienteFormDialog from '../forms/ExpedienteFormDialog';
+import ExpedienteDocumentosTab from './ExpedienteDocumentosTab';
 
 function TituloSeccion({ icono, texto }: { icono: string; texto: string }) {
 	return (
@@ -39,6 +42,7 @@ function ExpedienteDetailView() {
 	const { t, i18n } = useTranslation();
 	const { enqueueSnackbar } = useSnackbar();
 	const [dialogOpen, setDialogOpen] = useState(false);
+	const [tab, setTab] = useState<'detalles' | 'documentos'>('detalles');
 	const { data: expediente, isLoading } = useExpediente(expedienteId);
 	const cambiarEstadoMutation = useCambiarEstado();
 	const deleteMutation = useDeleteExpediente();
@@ -97,6 +101,7 @@ function ExpedienteDetailView() {
 						{expediente && (
 							<Select
 								size="small"
+								data-testid="expediente-estado-select"
 								value={expediente.statut}
 								onChange={(e) => onCambiarEstado(e.target.value as EstadoExpediente)}
 							>
@@ -110,13 +115,6 @@ function ExpedienteDetailView() {
 								))}
 							</Select>
 						)}
-						<Button
-							variant="outlined"
-							startIcon={<FuseSvgIcon size={18}>lucide:file-text</FuseSvgIcon>}
-							onClick={() => navigate(`/documentos?dossier=${expedienteId}`)}
-						>
-							{t('expedientes.detalle.documentos')}
-						</Button>
 						<Button
 							variant="outlined"
 							startIcon={<FuseSvgIcon size={18}>lucide:pencil</FuseSvgIcon>}
@@ -140,100 +138,133 @@ function ExpedienteDetailView() {
 
 						{expediente && (
 							<div className="flex flex-col gap-4">
-								<Paper className="rounded-xl p-6">
-									<TituloSeccion
-										icono="lucide:info"
-										texto={t('expedientes.detalle.detalles')}
+								<Tabs
+									value={tab}
+									onChange={(_e, valeur) => setTab(valeur)}
+									className="mb-2"
+								>
+									<Tab
+										value="detalles"
+										label={t('expedientes.detalle.detalles')}
 									/>
-									<div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-										<div>
-											<Typography
-												variant="caption"
-												color="text.secondary"
-											>
-												{t('expedientes.detalle.tipoTramite')}
-											</Typography>
-											<Typography variant="body1">{expediente.type_procedure || '—'}</Typography>
-										</div>
-										<div>
-											<Typography
-												variant="caption"
-												color="text.secondary"
-											>
-												{t('expedientes.detalle.fechaApertura')}
-											</Typography>
-											<Typography variant="body1">{expediente.date_ouverture}</Typography>
-										</div>
-										{expediente.date_cloture && (
-											<div>
-												<Typography
-													variant="caption"
-													color="text.secondary"
-												>
-													{t('expedientes.detalle.fechaCierre')}
-												</Typography>
-												<Typography variant="body1">{expediente.date_cloture}</Typography>
-											</div>
-										)}
-									</div>
-									{expediente.notes && (
-										<Typography
-											variant="body2"
-											className="mt-4 whitespace-pre-wrap"
-										>
-											{expediente.notes}
-										</Typography>
-									)}
-								</Paper>
+									<Tab
+										value="documentos"
+										label={t('expedientes.detalle.documentos')}
+									/>
+								</Tabs>
 
-								<Paper className="rounded-xl p-6">
-									<TituloSeccion
-										icono="lucide:history"
-										texto={t('expedientes.detalle.historial')}
+								{tab === 'documentos' && (
+									<ExpedienteDocumentosTab
+										dossierId={expediente.id}
+										clienteId={expediente.cliente}
+										clienteLabel={expediente.cliente_nom_complet}
 									/>
-									{!expediente.evenements || expediente.evenements.length === 0 ? (
-										<Typography
-											variant="body2"
-											color="text.disabled"
-										>
-											{t('expedientes.detalle.sinHistorial')}
-										</Typography>
-									) : (
-										<div className="flex flex-col gap-3">
-											{expediente.evenements.map((evento) => {
-												const info = estadoInfo(evento.nouveau_statut);
-												return (
-													<div
-														key={evento.id}
-														className="flex items-center gap-3 border-b pb-3 last:border-b-0 last:pb-0"
-														style={{ borderColor: 'var(--mui-palette-divider)' }}
+								)}
+
+								{tab === 'detalles' && (
+									<>
+										<Paper className="rounded-xl p-6">
+											<TituloSeccion
+												icono="lucide:info"
+												texto={t('expedientes.detalle.detalles')}
+											/>
+											<div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+												<div>
+													<Typography
+														variant="caption"
+														color="text.secondary"
 													>
-														<Chip
-															size="small"
-															label={info && t(info.labelKey)}
-															color={info?.color}
-														/>
-														<div className="flex-1">
-															<Typography variant="body2">
-																{evento.auteur?.displayName ??
-																	t('expedientes.detalle.sistema')}
-																{evento.commentaire ? ` — ${evento.commentaire}` : ''}
-															</Typography>
-															<Typography
-																variant="caption"
-																color="text.secondary"
-															>
-																{new Date(evento.created_at).toLocaleString(
-																	i18n.language === 'fr' ? 'fr-FR' : 'es-ES'
-																)}
-															</Typography>
-														</div>
+														{t('expedientes.detalle.tipoTramite')}
+													</Typography>
+													<Typography variant="body1">
+														{expediente.type_procedure || '—'}
+													</Typography>
+												</div>
+												<div>
+													<Typography
+														variant="caption"
+														color="text.secondary"
+													>
+														{t('expedientes.detalle.fechaApertura')}
+													</Typography>
+													<Typography variant="body1">{expediente.date_ouverture}</Typography>
+												</div>
+												{expediente.date_cloture && (
+													<div>
+														<Typography
+															variant="caption"
+															color="text.secondary"
+														>
+															{t('expedientes.detalle.fechaCierre')}
+														</Typography>
+														<Typography variant="body1">
+															{expediente.date_cloture}
+														</Typography>
 													</div>
-												);
-											})}
-										</div>
-									)}
-								</Paper>
+												)}
+											</div>
+											{expediente.notes && (
+												<Typography
+													variant="body2"
+													className="mt-4 whitespace-pre-wrap"
+												>
+													{expediente.notes}
+												</Typography>
+											)}
+										</Paper>
+
+										<Paper className="rounded-xl p-6">
+											<TituloSeccion
+												icono="lucide:history"
+												texto={t('expedientes.detalle.historial')}
+											/>
+											{!expediente.evenements || expediente.evenements.length === 0 ? (
+												<Typography
+													variant="body2"
+													color="text.disabled"
+												>
+													{t('expedientes.detalle.sinHistorial')}
+												</Typography>
+											) : (
+												<div className="flex flex-col gap-3">
+													{expediente.evenements.map((evento) => {
+														const info = estadoInfo(evento.nouveau_statut);
+														return (
+															<div
+																key={evento.id}
+																className="flex items-center gap-3 border-b pb-3 last:border-b-0 last:pb-0"
+																style={{ borderColor: 'var(--mui-palette-divider)' }}
+															>
+																<Chip
+																	size="small"
+																	label={info && t(info.labelKey)}
+																	color={info?.color}
+																/>
+																<div className="flex-1">
+																	<Typography variant="body2">
+																		{evento.auteur?.displayName ??
+																			t('expedientes.detalle.sistema')}
+																		{evento.commentaire
+																			? ` — ${evento.commentaire}`
+																			: ''}
+																	</Typography>
+																	<Typography
+																		variant="caption"
+																		color="text.secondary"
+																	>
+																		{new Date(evento.created_at).toLocaleString(
+																			i18n.language === 'fr' ? 'fr-FR' : 'es-ES'
+																		)}
+																	</Typography>
+																</div>
+															</div>
+														);
+													})}
+												</div>
+											)}
+										</Paper>
+									</>
+								)}
 							</div>
 						)}
 					</div>

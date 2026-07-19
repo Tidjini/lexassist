@@ -70,3 +70,31 @@ class TestNotificationViewSet:
             assert response.status_code == 200
             notification.refresh_from_db()
             assert notification.leida is True
+
+    def test_eliminar_propia_notificacion(self, cabinet, avocat):
+        with schema_context(cabinet.schema_name):
+            notification = Notification.objects.create(
+                destinataire=avocat, tipo=Notification.Tipo.DOCUMENTO_PROCESADO, mensaje="Hola"
+            )
+
+            response = appeler(
+                "delete", avocat, f"/api/notificaciones/{notification.id}/",
+                pk=notification.id, action="destroy",
+            )
+
+            assert response.status_code == 204
+            assert not Notification.objects.filter(id=notification.id).exists()
+
+    def test_no_puede_eliminar_notificacion_ajena(self, cabinet, avocat, autre_avocat):
+        with schema_context(cabinet.schema_name):
+            notification = Notification.objects.create(
+                destinataire=autre_avocat, tipo=Notification.Tipo.DOCUMENTO_PROCESADO, mensaje="Para otro"
+            )
+
+            response = appeler(
+                "delete", avocat, f"/api/notificaciones/{notification.id}/",
+                pk=notification.id, action="destroy",
+            )
+
+            assert response.status_code == 404
+            assert Notification.objects.filter(id=notification.id).exists()
