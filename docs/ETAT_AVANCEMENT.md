@@ -1,6 +1,6 @@
 # LexAssist — État d'avancement
 
-Dernière mise à jour : 2026-07-19 (import en masse + rapprochement IA + WebSocket).
+Dernière mise à jour : 2026-07-19 (refonte visuelle + corrections d'usage).
 Complète `docs/PLAN_ACTION.md` (le plan initial) en donnant une photo de ce qui est
 réellement fait, testé et déployé à date.
 
@@ -65,6 +65,25 @@ réellement fait, testé et déployé à date.
   numéro) — comportement attendu, pas un bug. Une fois la clé configurée, le
   rapprochement/la création automatique fonctionneront pour de vrai sans changement de
   code.
+
+## Fait (refonte visuelle + corrections d'usage)
+
+- **Design system appliqué** : les couleurs par module (clients/expedientes/documentos/
+  alertas), jusque-là définies dans le code sans être utilisées, sont maintenant visibles
+  partout (icônes, avatars à initiales, tableaux avec bordure/ombre au lieu de grilles
+  brutes). Nettoyage des outils de démo du template Fuse (recherche, plein écran,
+  personnalisateur de thème) sans usage pour ce cabinet. Corrections i18n (page de
+  connexion entièrement en anglais codé en dur, lien « mot de passe oublié » mort).
+- **Fiches client et dossier en onglets** : au lieu de renvoyer vers des listes séparées,
+  les expedientes/documents d'un client (et les documents d'un dossier) s'affichent
+  directement sur place.
+- **Bug de cache corrigé** : les compteurs et statuts qui restaient figés jusqu'au
+  rechargement manuel de la page (ex. « Expedientes (0) » alors qu'un dossier vient d'être
+  créé) — cause racine identifiée et corrigée (clé de cache React Query mal construite).
+- **Upload multi-fichiers**, notifications cliquables (renvoient vers le document concerné)
+  et supprimables par l'utilisateur.
+- Deux ajustements visuels mineurs (rayon des coins des tableaux, taille des icônes de
+  fichier) suite aux retours de Lucia.
 
 ### Accès démo
 
